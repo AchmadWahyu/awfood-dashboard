@@ -249,7 +249,7 @@ export function VariantA(props: SharedProps) {
         </div>
       </div>
 
-      <div className="notebook-sheet rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
+      <div className=" rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
         {!onKasStep && si && (
           <>
             <div className="mb-4 flex items-start gap-3 border-l-4 border-marker pl-3">
@@ -408,7 +408,7 @@ export function VariantB(props: SharedProps) {
         return (
           <div
             key={si.supplierId}
-            className="notebook-sheet rounded-2xl border border-notch-border bg-paper-light shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+            className=" rounded-2xl border border-notch-border bg-paper-light shadow-sm overflow-hidden transition-shadow hover:shadow-md"
           >
             <button
               onClick={() => setOpenId(isOpen ? null : si.supplierId)}
@@ -472,7 +472,7 @@ export function VariantB(props: SharedProps) {
       })}
 
       {/* Kas Fisik */}
-      <div className="notebook-sheet rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
+      <div className=" rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
         <h3 className="mb-3 text-sm font-bold text-marker">Kas Fisik</h3>
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold text-ink">Rp</span>
@@ -541,7 +541,7 @@ export function VariantC(props: SharedProps) {
         <span className="text-[10px] font-bold uppercase tracking-widest text-marker/60">Kategori Supplier</span>
       </div>
 
-      <div className="notebook-sheet overflow-hidden rounded-2xl border border-notch-border bg-paper-light shadow-sm">
+      <div className=" overflow-hidden rounded-2xl border border-notch-border bg-paper-light shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

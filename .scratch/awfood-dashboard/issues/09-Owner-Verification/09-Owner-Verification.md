@@ -1,19 +1,21 @@
 # 09 — Owner Verifikasi Closing (satu langkah + selisih ≤5k)
 
-**What to build:** Halaman owner untuk verifikasi closing. Lihat daftar closing pending (status SUBMITTED) → buka detail: tampilkan stok per supplier, expected revenue, kas fisik, dan supplier payments dari laci. Owner konfirmasi kas fisik, input QRIS final. Sistem hitung discrepancy:
+**What to build:** Halaman owner untuk verifikasi closing. Lihat daftar closing pending (status SUBMITTED) → buka detail: tampilkan stok per supplier, expected revenue, kas fisik, dan supplier payments dari laci. Owner konfirmasi kas fisik, **input `cash_initial` (wajib)** dan input QRIS final. Sistem hitung discrepancy:
 ```
-adjusted_cash = cash_physical + sum(paid_from_drawer payments)
-discrepancy = expected_revenue - (adjusted_cash + qris_verified)
+adjusted_cash = (cash_physical - cash_initial) + sum(expenses CASH_LACI) + sum(paid_from_drawer payments)
+discrepancy = total_omzet - (adjusted_cash + qris_verified)
 ```
-Jika discrepancy ≤ Rp5.000 → auto resolve (catat di notes + discrepancy amount).
+Jika discrepancy ≤ Rp5.000 → tidak masuk investigasi (selisih kecil); > Rp5.000 → status `open`.
 Update daily_closings: status = VERIFIED, verified_by, verified_at.
 Vitest untuk reconciliation calculation & discrepancy handling.
 
-Route: `/owner/verification`
+Route: `/owner/verifikasi` (MVP) / `/owner/verification` (produksi)
 
 **Blocked by:** 07, 08
 
 **Status:** parent — lihat sub-tickets di bawah
+
+**Keputusan desain (ADR-0001 + ADR-0002):** `cash_initial` diinput owner saat verifikasi (wajib), bukan staff. Formula selisih lengkap menyertakan pengeluaran CASH_LACI dan setoran supplier dari laci.
 
 **Sub-tickets:**
 - [09a — Daftar closing pending](09a-Pending-Closing-List.md)

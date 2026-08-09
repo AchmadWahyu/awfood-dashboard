@@ -1,12 +1,14 @@
 # 11 — Request Edit (employee ajukan, owner approve)
 
-**What to build:** Setelah closing di-submit, employee bisa ajukan request edit. Halaman employee: pilih closing, isi reason + data baru. Server action INSERT audit_request_edits (PENDING_OWNER). Halaman owner: lihat pending request, compare old vs new data, approve (terapkan perubahan) atau reject. Vitest.
+**What to build:** Setelah closing di-submit, employee bisa ajukan request edit. Halaman employee: pilih closing, edit seluruh data penutupan (seperti form closing) + reason. Request disimpan sebagai **snapshot penuh** (items + kas fisik). Halaman owner: lihat pending request, lihat snapshot vs data lama, approve (terapkan perubahan + hitung ulang selisih) atau reject. Vitest.
 
 Routes: `/employee/request-edit`, `/owner/request-edit`
 
 **Blocked by:** 07
 
 **Status:** parent — lihat sub-tickets di bawah
+
+**Keputusan desain (ADR-0002):** Request edit memakai **snapshot penuh** (bukan per-field). Staff tidak bisa mengubah `cash_initial` — field tak tampil di form dan dipertahankan dari closing saat approve.
 
 **Sub-tickets:**
 - [11a — Employee daftar closing](11a-Employee-Closing-List.md)

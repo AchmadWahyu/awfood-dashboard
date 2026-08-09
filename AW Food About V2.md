@@ -1,5 +1,7 @@
 # Requirement Web Dashboard AW Food V2
 
+> **Status implementasi (per 2026-08):** Dokumen ini adalah target produksi (Next.js + Supabase). MVP saat ini berjalan dengan **data dummy di browser** (`lib/dummy/*`) — lihat `README.md` untuk detail status MVP. Fitur Restock, Klaim, dan Supplier Ledger **OFF di first release** (sampai waktu yang belum ditentukan), tapi **bisa diaktifkan kapan saja** via feature flag (`lib/feature-flags.ts`). Ketiganya tetap menjadi bagian dari requirement ini.
+
 ## 1. Profil Bisnis
 
 **Profil Usaha:** Jualan macam-macam kue basah (pastel, lemper, sosis solo, donat, dll.) dan minuman di dekat pintu masuk Kukel UI.

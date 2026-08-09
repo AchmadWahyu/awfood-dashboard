@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     role TEXT NOT NULL CHECK (role IN ('OWNER', 'STAFF')),
     pin_hash TEXT, -- NULL untuk Owner, Bcrypt hash untuk Staff PIN
     is_active BOOLEAN DEFAULT TRUE NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    staff_code TEXT UNIQUE, -- kode unik untuk tiap staff, misal "STF-001", "STF-002", dst.
+    auth_token TEXT -- token buat ganti password buat staff
 );
 
 -- Function Helper: Cek apakah user saat ini adalah Owner yang aktif
@@ -107,6 +109,7 @@ CREATE TABLE IF NOT EXISTS public.daily_closings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     closing_date DATE NOT NULL UNIQUE,
     staff_id UUID NOT NULL REFERENCES public.profiles(id),
+    cash_initial NUMERIC(12,2) DEFAULT 0 NOT NULL, -- uang kembalian awal di laci (modal kerja, bukan omzet)
     cash_physical NUMERIC(12,2) DEFAULT 0 NOT NULL,
     qris_physical NUMERIC(12,2) DEFAULT 0 NOT NULL,
     total_system_omzet NUMERIC(12,2) DEFAULT 0 NOT NULL,

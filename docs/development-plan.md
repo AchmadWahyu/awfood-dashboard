@@ -8,6 +8,14 @@ Testing framework: Vitest
 
 Route structure: `/employee/*` dan `/owner/*` dalam satu Next.js app.
 
+## Status saat ini (per 2026-08)
+
+**MVP dummy (localStorage)** — semua halaman berjalan dengan data dummy (`lib/dummy/*`) + auth dummy (`lib/auth.tsx`); Supabase sudah di-setup tapi belum dipakai di halaman. Peta di bawah adalah **target produksi**. Perbedaan utama MVP vs target:
+
+- Verifikasi closing memakai rumus lengkap ADR-0001/ADR-0002 (`discrepancy = omzet − ((kas_fisik − kas_awal) + pengeluaran CASH_LACI + setoran supplier dari laci + qris)`).
+- Fitur Restock, Klaim, dan Supplier Ledger **off di first release** (sampai waktu belum ditentukan), dikontrol feature flag `lib/feature-flags.ts`; bisa diaktifkan kapan saja. Halaman & issue tetap ada.
+- Rekap Harian (mock) **sudah dihapus** dari MVP dan plan.
+
 ---
 
 ## Phase 0: Setup Proyek & Database

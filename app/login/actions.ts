@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import bcrypt from "bcryptjs";
 
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 5;
@@ -58,26 +57,22 @@ export async function staffLogin(
 
   const supabase = await createClient();
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("pin_hash, auth_token")
-    .eq("staff_code", staffCode)
-    .single();
+  const { data: authToken, error: authTokenError } = await supabase
+    .rpc('verify_staff_pin', { staff_code_input: staffCode, pin_input: pin });
 
-  if (profileError || !profile?.pin_hash || !profile?.auth_token) {
-    return { error: "Kode staff tidak ditemukan" };
+  if (authTokenError) {
+    return { error: authTokenError.message };
   }
 
-  const valid = await bcrypt.compare(pin, profile.pin_hash);
-  if (!valid) {
-    return { error: "PIN salah" };
+  if (!authToken) {
+    return { error: "Kode staff atau PIN salah" };
   }
 
   const email = `staff-${staffCode}@app.awfood.local`;
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password: profile.auth_token,
+    password: authToken,
   });
 
   if (error) return { error: error.message };

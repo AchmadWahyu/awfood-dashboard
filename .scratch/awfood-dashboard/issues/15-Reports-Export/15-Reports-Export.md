@@ -2,7 +2,9 @@
 
 **What to build:** Halaman owner untuk generate laporan: laporan penjualan (filter date range), laporan supplier ledger, riwayat selisih. Export ke format Excel (.xlsx) dan CSV.
 
-Route: `/owner/reports`
+Route: `/owner/laporan` (MVP memakai route ini; `/owner/reports` adalah nama kanonik di produksi)
+
+> **Kondisi MVP (per 2026-08-09):** Laporan penjualan di `/owner/laporan` sudah berjalan dengan **card list + bottomsheet detail** (klik kartu → detail closing via `?closing=id`), dan export **CSV** (Penjualan, Pengeluaran, Potongan Gaji). Export `.xlsx` (15d) tetap target produksi.
 
 **Blocked by:** 09
 
