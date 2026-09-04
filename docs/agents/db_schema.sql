@@ -60,6 +60,32 @@ CREATE POLICY "Owner manage all profiles"
     ON public.profiles FOR ALL 
     USING (public.is_owner());
 
+-- Staff PIN login (Issue 02b): lookup staff by code, return pin_hash + auth_token.
+-- Verifikasi PIN dilakukan di app layer (bcrypt.compare) untuk menghindari
+-- ketidakcocokan prefix bcrypt ($2b$) antara pgcrypto dan Node.js bcryptjs.
+-- auth_token dipakai sebagai password auth user staff (lihat app/login/actions.ts).
+DROP FUNCTION IF EXISTS public.verify_staff_pin(TEXT, TEXT);
+
+CREATE OR REPLACE FUNCTION public.get_staff_auth(
+  staff_code_input TEXT
+)
+RETURNS TABLE(staff_code TEXT, pin_hash TEXT, auth_token TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT p.staff_code, p.pin_hash, p.auth_token
+  FROM public.profiles p
+  WHERE p.staff_code = staff_code_input
+    AND p.role = 'STAFF'
+    AND p.is_active = TRUE;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.get_staff_auth(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_staff_auth(TEXT) TO anon, authenticated;
+
 -- ========================================================
 -- 3. KATALOG & SUPPLIER
 -- ========================================================
@@ -260,3 +286,21 @@ CREATE POLICY "Authenticated insert settlements"
 CREATE POLICY "Owner manage settlements" 
     ON public.supplier_settlements FOR ALL 
     USING (public.is_owner());
+
+-- ========================================================
+-- 9. GRANTS (issue 02b/02d)
+-- Tabel dari db_schema.sql dibuat via SQL editor → Supabase TIDAK otomatis
+-- GRANT ke role anon/authenticated/service_role. Tanpa ini muncul error
+-- `42501 permission denied` (lapis GRANT, beda dari lapis RLS).
+-- -- service_role: dipakai seed script (scripts/seed.mjs) + admin task.
+-- -- authenticated: baca/tulis semua tabel (RLS tetap membatasi per-row).
+-- -- anon: hanya SELECT; RLS menolak semua baris untuk anon (semua policy butuh authenticated).
+-- ========================================================
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT ALL ON TABLES TO service_role, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT ON TABLES TO anon;

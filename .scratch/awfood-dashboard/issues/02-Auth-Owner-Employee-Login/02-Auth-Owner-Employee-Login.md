@@ -4,7 +4,9 @@
 
 **Blocked by:** 01
 
-**Status:** parent — lihat sub-tickets di bawah
+**Status:** selesai — owner dan staff terverifikasi manual; eksekusi E2E otomatis tertunda environment
+
+**Progress 2026-09-04:** Staff dan owner login sudah terverifikasi manual tidak bounce, termasuk setelah refresh. Konfigurasi Playwright dan spesifikasi regresi sudah ditambahkan, tetapi runner tidak dapat berjalan di terminal WSL saat ini.
 
 **Sub-tickets:**
 - [02a — Login page (/login)](02a-Login-Page-Owner.md)

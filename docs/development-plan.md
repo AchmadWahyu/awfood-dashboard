@@ -10,7 +10,7 @@ Route structure: `/employee/*` dan `/owner/*` dalam satu Next.js app.
 
 ## Status saat ini (per 2026-08)
 
-**MVP dummy (localStorage)** — semua halaman berjalan dengan data dummy (`lib/dummy/*`) + auth dummy (`lib/auth.tsx`); Supabase sudah di-setup tapi belum dipakai di halaman. Peta di bawah adalah **target produksi**. Perbedaan utama MVP vs target:
+**MVP hybrid** — data bisnis halaman masih berjalan dengan dummy/localStorage (`lib/dummy/*`), sedangkan login owner dan staff sudah memakai Supabase Auth. Peta di bawah adalah **target produksi**. Perbedaan utama MVP vs target:
 
 - Verifikasi closing memakai rumus lengkap ADR-0001/ADR-0002 (`discrepancy = omzet − ((kas_fisik − kas_awal) + pengeluaran CASH_LACI + setoran supplier dari laci + qris)`).
 - Fitur Restock, Klaim, dan Supplier Ledger **off di first release** (sampai waktu belum ditentukan), dikontrol feature flag `lib/feature-flags.ts`; bisa diaktifkan kapan saja. Halaman & issue tetap ada.
@@ -33,10 +33,11 @@ Route structure: `/employee/*` dan `/owner/*` dalam satu Next.js app.
 - [ ] Setup environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)
 
 ### 0.3 Setup Auth Route
-- [ ] Owner login page (`/login`) — email+password via Supabase Auth
-- [ ] Employee login page (`/login/pin`) — server action verifikasi PIN
-- [ ] Middleware untuk routing proteksi (`/employee/*` dan `/owner/*`)
-- [ ] Seed script untuk buat akun staff (dummy auth user + pin_hash)
+- [x] Owner login page (`/login`) — email+password via Supabase Auth
+- [x] Employee login page (`/login/pin`) — server action verifikasi PIN
+- [x] Middleware/proxy untuk routing proteksi (`/employee/*` dan `/owner/*`)
+- [x] Seed script untuk buat akun staff (dummy auth user + pin_hash)
+- [~] Regresi auth Playwright — spesifikasi tersedia; eksekusi menunggu environment browser yang kompatibel
 
 ### 0.4 Setup Vitest
 - [ ] Config Vitest (vitest.config.ts)

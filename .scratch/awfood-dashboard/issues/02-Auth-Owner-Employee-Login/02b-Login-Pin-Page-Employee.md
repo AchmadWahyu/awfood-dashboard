@@ -4,13 +4,13 @@
 
 **Blocked by:** 01e
 
-**Status:** in-progress — blocker: RLS tidak mengizinkan anon membaca `profiles` saat login
+**Status:** selesai — terverifikasi manual 2026-09-04; E2E pending environment
 
 - [x] Input PIN (4-6 digit, numeric only)
 - [x] Server action: cari profile by role = STAFF, bcrypt compare pin_hash (actions.ts sudah ada)
-- [ ] Buat session server-side via `createServerActionClient`
-- [ ] Redirect ke `/employee/penutupan` on success
-- [ ] Tampilkan error jika PIN salah
+- [x] Buat session server-side via `createClient()` dari adapter Supabase SSR
+- [x] Navigasi ke `/employee/penutupan` setelah state `AuthProvider` staff tersedia
+- [x] Tampilkan error jika PIN salah
 
 ## Comments
 
@@ -92,3 +92,15 @@
   - **Sudah selesai di sesi ini:**
     - `actions.ts` diupdate pakai `.rpc('verify_staff_pin')` — bersih, `bcryptjs` import dihapus, `console.log("AAA")` dihapus.
     - `app/login/pin/page.tsx` sudah ada (dari sesi sebelumnya).
+
+## Comments
+
+- **2026-08-09 (implementasi langsung, sesi tanpa coaching):**
+  - `app/login/pin/page.tsx` di-restyle ke tema notebook & konsisten dengan `/login` (link bolak-balik owner/staff ditambah).
+  - `verify_staff_pin` masuk `docs/agents/db_schema.sql` versi fix: `SET search_path = 'public, extensions'` (pgcrypto di schema `extensions`) + `REVOKE` dari PUBLIC + `GRANT EXECUTE` ke anon & authenticated + filter `is_active = TRUE`.
+  - **Blocker DB (harus di-run user di Supabase SQL Editor):** function di database masih versi lama (atau belum ada). Jalankan `DROP FUNCTION IF EXISTS public.verify_staff_pin(TEXT, TEXT);` lalu CREATE ulang dari db_schema.sql (section 2), plus blok GRANTS (section 9) — karena `service_role` juga belum dapat akses ke `profiles`.
+  - Setelah GRANT, `npm run seed` untuk mengisi `pin_hash`/`auth_token` staff.
+
+- **2026-08-09 (lanjutan):** Error `crypt(text, text) does not exist` tetap muncul karena function yang aktif di DB masih versi lama (CREATE OR REPLACE tidak mengganti versi tersimpan). Fix: db_schema.sql section 2 sekarang diawali `DROP FUNCTION IF EXISTS public.verify_staff_pin(TEXT, TEXT);` — run ulang blok itu di SQL Editor. Kalau masih gagal, cek lokasi pgcrypto dengan query di komentar (cocokkan dengan `SET search_path`).
+
+- **2026-09-04:** Login staff (`B001`/PIN) berhasil dan tidak lagi bounce ke `/login`. Root cause adalah state `AuthProvider` masih `null` saat redirect server-side memount employee layout. `staffLogin` sekarang mengembalikan profil `STAFF`; halaman PIN memasang state provider sebelum `router.replace("/employee/penutupan")`. Konfigurasi Playwright ditambahkan untuk regresi, tetapi runner tidak dapat berjalan dari terminal WSL saat ini.

@@ -1,59 +1,67 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { User, Role } from "@/lib/dummy/types";
-import { getCurrentUser, setCurrentUser, findUserByEmail, findUserByStaffCode, getUsers } from "@/lib/dummy/api";
+import { getAuthUser, logout as serverLogout } from "@/app/login/actions";
+import type { Role } from "@/lib/dummy/types";
+
+export interface AuthUser {
+  id: string;
+  email: string | null;
+  full_name: string;
+  role: Role;
+  staff_code?: string | null;
+}
 
 interface AuthContextValue {
-  user: User | null;
+  user: AuthUser | null;
   role: Role | null;
-  loginOwner: (email?: string) => boolean;
-  loginStaff: (staffCode: string, pin: string) => boolean;
-  logout: () => void;
+  setAuthenticatedUser: (user: AuthUser) => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const loadRequest = useRef(0);
 
   useEffect(() => {
-    const u = getCurrentUser();
-    setUser(u);
+    let active = true;
+    const requestId = ++loadRequest.current;
+
+    async function loadUser() {
+      try {
+        const authUser = await getAuthUser();
+        if (active && requestId === loadRequest.current) setUser(authUser as AuthUser | null);
+      } catch {
+        if (active && requestId === loadRequest.current) setUser(null);
+      } finally {
+        if (active && requestId === loadRequest.current) setLoading(false);
+      }
+    }
+
+    loadUser();
+
+    return () => { active = false; };
+  }, []);
+
+  const setAuthenticatedUser = useCallback((authenticatedUser: AuthUser) => {
+    loadRequest.current += 1;
+    setUser(authenticatedUser);
     setLoading(false);
   }, []);
 
-  const loginOwner = (email?: string): boolean => {
-    const target = email || "owner@awfood.id";
-    const u = findUserByEmail(target);
-    if (!u || u.role !== "OWNER") return false;
-    setCurrentUser(u);
-    setUser(u);
-    router.replace("/owner/dashboard");
-    return true;
-  };
-
-  const loginStaff = (staffCode: string, pin: string): boolean => {
-    const u = findUserByStaffCode(staffCode);
-    if (!u || u.role !== "STAFF" || u.pin !== pin) return false;
-    setCurrentUser(u);
-    setUser(u);
-    router.replace("/employee/penutupan");
-    return true;
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
+  const logout = useCallback(async () => {
+    loadRequest.current += 1;
     setUser(null);
-    router.replace("/login");
-  };
+    await serverLogout();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role: user?.role || null, loginOwner, loginStaff, logout, loading }}>
+    <AuthContext.Provider value={{ user, role: user?.role ?? null, setAuthenticatedUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

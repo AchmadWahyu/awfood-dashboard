@@ -2,7 +2,7 @@
 
 Dashboard konsinyasi stok + rekonsiliasi kas untuk jualan kue basah dan minuman dekat pintu masuk Kukel UI. Next.js + Tailwind CSS v4, mobile-first.
 
-> **Status saat ini: MVP dummy (localStorage).** Seluruh alur berjalan dengan data dummy di browser (`lib/dummy/*`), belum terhubung Supabase. PRD (`AW Food About V2.md`) tetap menjadi target produksi.
+> **Status saat ini: MVP hybrid.** Data bisnis masih dummy/localStorage (`lib/dummy/*`), tetapi login owner dan staff sudah terhubung ke Supabase Auth. PRD (`AW Food About V2.md`) tetap menjadi target produksi.
 
 ## Dokumentasi
 
@@ -19,7 +19,7 @@ Dashboard konsinyasi stok + rekonsiliasi kas untuk jualan kue basah dan minuman 
 
 ## Status MVP dummy
 
-- **Auth:** dummy via `lib/auth.tsx` — owner (email) + staff (kode + PIN). Akun: owner klik langsung di login; staff `B001/1234` atau `A002/5678`.
+- **Auth:** Supabase Auth via `lib/auth.tsx` — owner login email/password, staff login kode/PIN. Route `/owner/*` dan `/employee/*` diproteksi proxy dan role guard klien.
 - **Data:** tersimpan di localStorage (`awfood-mvp-*`), di-seed ulang setiap `/login` di-mount. Refresh halaman login untuk reset data.
 - **Form penutupan:** tanggal bisa dipilih manual via date picker **dev-only** (`process.env.NODE_ENV === "development"`), untuk simulasi multi-hari tanpa mengubah jam sistem.
 - **Fitur off (first release):** Restock, Klaim, dan Ledger sengaja tidak diaktifkan pada rilis pertama (sampai waktu yang belum ditentukan), tapi bisa dikembalikan kapan saja via `lib/feature-flags.ts` — set `true` untuk memunculkannya di menu. Halaman tidak dihapus.
