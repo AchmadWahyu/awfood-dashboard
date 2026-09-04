@@ -128,6 +128,28 @@ CREATE POLICY "Owner manage items"
     ON public.master_items FOR ALL 
     USING (public.is_owner());
 
+-- ========================================================  
+-- 3b. RESTOCK MINUMAN (Owner-only)
+-- ========================================================  
+CREATE TABLE IF NOT EXISTS public.restocks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    item_id UUID NOT NULL REFERENCES public.master_items(id) ON DELETE CASCADE,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    restock_date DATE NOT NULL,
+    created_by UUID NOT NULL REFERENCES public.profiles(id),
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+ALTER TABLE public.restocks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated read restocks" 
+    ON public.restocks FOR SELECT 
+    USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Owner manage restocks" 
+    ON public.restocks FOR ALL 
+    USING (public.is_owner());
+
 -- ========================================================
 -- 4. OPERASIONAL HARIAN & CLOSING (SHIFT)
 -- ========================================================
