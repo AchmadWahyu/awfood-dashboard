@@ -24,7 +24,7 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
   };
 
   let currentTable: string | null = null;
-  let currentFilters: { column: string; value: any }[] = [];
+  let currentFilters: { column: string; value: any; op?: string }[] = [];
   let currentSingle = false;
   let currentOrder: { column: string; ascending: boolean } | null = null;
 
@@ -40,7 +40,11 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
 
     // Apply filters
     for (const filter of currentFilters) {
-      result = result.filter((row: any) => row[filter.column] === filter.value);
+      if (filter.op === "lte") {
+        result = result.filter((row: any) => row[filter.column] <= filter.value);
+      } else {
+        result = result.filter((row: any) => row[filter.column] === filter.value);
+      }
     }
 
     // Apply order
@@ -85,6 +89,12 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
                   currentOrder = { column: col, ascending };
                   return Promise.resolve(buildResult());
                 },
+                lte: (col: string, val: any) => {
+                  currentFilters.push({ column: col, value: val, op: "lte" });
+                  return {
+                    then: (callback: any) => Promise.resolve(buildResult()).then(callback),
+                  };
+                },
                 then: (callback: any) => Promise.resolve(buildResult()).then(callback),
               };
             },
@@ -98,14 +108,30 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
           };
           return chain;
         },
-        insert: (row: any) => {
-          const newRow = { id: `mock-${Date.now()}`, ...row, created_at: new Date().toISOString() };
+        insert: (row: any | any[]) => {
+          const rows = Array.isArray(row) ? row : [row];
+          const newRows = rows.map((r) => ({ id: `mock-${Date.now()}-${Math.random().toString(36).slice(2)}`, ...r, created_at: new Date().toISOString() }));
           const tableKey = currentTable as keyof MockData;
-          if (data[tableKey]) {
-            (data[tableKey] as any[]).push(newRow);
-          }
-          reset();
-          return Promise.resolve({ data: newRow, error: null });
+
+          const chain = {
+            select: () => ({
+              single: () => {
+                if (data[tableKey]) {
+                  (data[tableKey] as any[]).push(...newRows);
+                }
+                reset();
+                return Promise.resolve({ data: newRows[0], error: null });
+              },
+            }),
+            then: (callback: any) => {
+              if (data[tableKey]) {
+                (data[tableKey] as any[]).push(...newRows);
+              }
+              reset();
+              return Promise.resolve({ data: newRows, error: null }).then(callback);
+            },
+          };
+          return chain;
         },
         update: (patch: any) => ({
           eq: (column: string, value: any) => {

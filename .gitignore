@@ -48,3 +48,14 @@ next-env.d.ts
 .dev/
 .impeccable/
 .kilo/
+.scratch/
+
+# seed scripts with credentials
+scripts/seed.mjs
+scripts/seed-staging.mjs
+scripts/rotate-credentials.mjs
+
+# data & logs
+docs/data.json
+*.log
+*.err

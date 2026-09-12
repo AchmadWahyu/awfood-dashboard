@@ -8,7 +8,7 @@
 
 MVP dummy (localStorage) sudah berjalan penuh untuk demo. Fakta penting:
 
-- **Semua data dummy** di `lib/dummy/*`, auth dummy di `lib/auth.tsx` (owner email + staff kode/PIN `B001/1234`, `A002/5678`). Seed ulang tiap `/login` di-mount.
+- **Semua data dummy** di `lib/dummy/*`, auth dummy di `lib/auth.tsx`. Staff login pakai kode staff + PIN (contoh format: `{STAFF_ID}/{PIN}`). Seed ulang tiap `/login` di-mount.
 - **Feature flags** `lib/feature-flags.ts` mengontrol menu yang off di first release: Restock, Klaim, Ledger (off sampai waktu belum ditentukan, bisa turn on kapan saja). Halaman tidak dihapus, hanya toggle.
 - **Rekap Harian (mock) dihapus** dari MVP dan plan (keputusan 2026-08-09) — jangan dikembalikan tanpa keputusan baru.
 - **Date picker dev-only** di form penutupan untuk simulasi multi-hari.

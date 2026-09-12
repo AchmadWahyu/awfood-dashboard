@@ -39,7 +39,7 @@ export interface Restock {
   created_at: string;
 }
 
-export type ClosingStatus = "draft" | "submitted" | "verified";
+export type ClosingStatus = "draft" | "submitted" | "verified" | "rejected";
 
 export interface ClosingItem {
   id: string;
@@ -71,6 +71,9 @@ export interface DailyClosing {
   verified_at: string | null;
   created_at: string;
   updated_at: string;
+  expenses_cash_snapshot: number;
+  expenses_qris_snapshot: number;
+  expenses?: Expense[];
 }
 
 export type ClaimType = "rusak" | "basi" | "bonus" | "konsumsi_internal";

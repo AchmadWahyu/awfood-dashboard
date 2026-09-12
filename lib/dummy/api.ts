@@ -3,12 +3,16 @@ import type {
   User, Supplier, Item, Restock, DailyClosing, Claim, RequestEdit,
   SupplierSettlement, Expense, EmployeeDeduction, SupplierLedgerEntry,
 } from "./types";
-import { seedAll } from "./seed";
+import { seedMasterData, seedTransactionData } from "./seed";
 
 function init() {
   if (typeof window === "undefined") return;
   if (!getKey<boolean>("initialized", false)) {
-    seedAll();
+    // First time: seed master data + empty transaction data
+    seedMasterData();
+    seedTransactionData();
+    setKey("initialized", true);
+    setKey("current_user", null as User | null);
   }
 }
 
@@ -116,4 +120,4 @@ export const getLedger = () => list<SupplierLedgerEntry>("ledger");
 export const addLedgerEntry = (e: SupplierLedgerEntry) => add("ledger", e);
 
 // Reset
-export { seedAll, clearAll } from "./seed";
+export { seedMasterData, seedTransactionData, resetTransactionData, clearAll } from "./seed";

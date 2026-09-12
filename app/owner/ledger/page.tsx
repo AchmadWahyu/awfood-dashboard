@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { getSuppliers, getSettlements, addSettlement, getClosings, addLedgerEntry } from "@/lib/dummy/api";
-import { todayLocal } from "@/lib/dummy/date";
+import { todayLocal } from "@/lib/utils/date";
 import type { SupplierSettlement, SupplierLedgerEntry } from "@/lib/dummy/types";
 
 function formatRp(n: number) {

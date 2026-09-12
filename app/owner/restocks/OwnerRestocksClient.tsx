@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createRestock, getRestocks } from "./actions";
 import type { Restock } from "./actions";
 import type { Item } from "../items/actions";
-import { todayLocal } from "@/lib/dummy/date";
+import { todayLocal } from "@/lib/utils/date";
 
 export default function OwnerRestocksClient({ 
   initialRestocks, 

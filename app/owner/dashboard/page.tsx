@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useSyncStorage } from "@/lib/dummy/sync";
 import { getClosings, getItems, getPendingRequestEdits } from "@/lib/dummy/api";
-import { todayLocal } from "@/lib/dummy/date";
+import { todayLocal } from "@/lib/utils/date";
 import Link from "next/link";
 
 function formatRp(n: number) {

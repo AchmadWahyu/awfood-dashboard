@@ -35,7 +35,7 @@ export default function OwnerItemsClient({
     const fd = new FormData();
     fd.append("name", form.name);
     fd.append("supplier_id", form.supplier_id || "");
-    fd.append("type", form.type);
+    fd.append("category", form.type);
     fd.append("cost_price", form.cost_price);
     fd.append("selling_price", form.selling_price);
     await createItem(fd);
@@ -60,7 +60,7 @@ export default function OwnerItemsClient({
     const fd = new FormData();
     fd.append("name", form.name);
     fd.append("supplier_id", form.supplier_id || "");
-    fd.append("type", form.type);
+    fd.append("category", form.type);
     fd.append("cost_price", form.cost_price);
     fd.append("selling_price", form.selling_price);
     fd.append("is_active", "true");

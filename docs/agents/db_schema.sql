@@ -162,8 +162,16 @@ CREATE TABLE IF NOT EXISTS public.daily_closings (
     qris_physical NUMERIC(12,2) DEFAULT 0 NOT NULL,
     total_system_omzet NUMERIC(12,2) DEFAULT 0 NOT NULL,
     cash_discrepancy NUMERIC(12,2) DEFAULT 0 NOT NULL,
+    expenses_cash_snapshot NUMERIC(12,2) DEFAULT 0 NOT NULL,
+    expenses_qris_snapshot NUMERIC(12,2) DEFAULT 0 NOT NULL,
+    discrepancy_status TEXT CHECK (discrepancy_status IN ('open', 'resolved')),
+    discrepancy_resolution TEXT CHECK (discrepancy_resolution IN ('koreksi data', 'ditanggung usaha', 'ditanggung karyawan')),
+    status TEXT DEFAULT 'submitted' NOT NULL CHECK (status IN ('submitted', 'verified', 'rejected')),
+    verified_by UUID REFERENCES public.profiles(id),
+    verified_at TIMESTAMPTZ,
     notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 ALTER TABLE public.daily_closings ENABLE ROW LEVEL SECURITY;
@@ -308,6 +316,35 @@ CREATE POLICY "Authenticated insert settlements"
 CREATE POLICY "Owner manage settlements" 
     ON public.supplier_settlements FOR ALL 
     USING (public.is_owner());
+
+-- ========================================================
+-- 8b. PENGELUARAN (EXPENSES)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS public.expenses (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    category TEXT NOT NULL CHECK (category IN ('BAHAN_MINUMAN', 'BAHAN_KUE', 'PLASTIK', 'KARDUS', 'NOTA', 'STEMPEL_STIKER', 'LAINNYA')),
+    custom_label TEXT,
+    amount NUMERIC(12,2) NOT NULL CHECK (amount > 0),
+    pocket TEXT NOT NULL CHECK (pocket IN ('CASH_LACI', 'QRIS_AWFOOD')),
+    expense_date DATE NOT NULL,
+    note TEXT,
+    created_by UUID NOT NULL REFERENCES public.profiles(id),
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+
+-- Staff bisa melihat (SELECT) pengeluaran untuk transparansi di riwayat closing
+CREATE POLICY "Authenticated read expenses" 
+    ON public.expenses FOR SELECT 
+    USING (auth.role() = 'authenticated');
+
+-- Owner-only: hanya owner yang bisa add/edit/delete pengeluaran
+CREATE POLICY "Owner manage expenses" 
+    ON public.expenses FOR ALL 
+    USING (public.is_owner());
+
+CREATE INDEX IF NOT EXISTS idx_expenses_expense_date ON public.expenses(expense_date);
 
 -- ========================================================
 -- 9. GRANTS (issue 02b/02d)

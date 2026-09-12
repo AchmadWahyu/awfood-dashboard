@@ -1,4 +1,4 @@
-import { setKey } from "./storage";
+import { setKey, getKey } from "./storage";
 import type {
   User, Supplier, Item, Restock, DailyClosing, Claim, RequestEdit,
   SupplierSettlement, Expense, EmployeeDeduction, SupplierLedgerEntry,
@@ -18,7 +18,7 @@ export const seedUsers: User[] = [
     full_name: "Budi Karyawan",
     role: "STAFF",
     staff_code: "B001",
-    pin: "1234",
+    pin: "", // PIN di-set manual saat seeding
     created_at: "2024-01-01T00:00:00Z",
   },
   {
@@ -27,7 +27,7 @@ export const seedUsers: User[] = [
     full_name: "Ani Karyawan",
     role: "STAFF",
     staff_code: "A002",
-    pin: "5678",
+    pin: "", // PIN di-set manual saat seeding
     created_at: "2024-01-01T00:00:00Z",
   },
 ];
@@ -72,10 +72,44 @@ export const seedItems: Item[] = [
   { id: "item-52", name: "Es Jeruk", supplier_id: null, type: "MINUMAN_OWNER", price_buy: 1500, price_sell: 4000, is_active: true, created_at: "2024-01-01T00:00:00Z" },
 ];
 
-export function seedAll() {
-  setKey("users", seedUsers);
-  setKey("suppliers", seedSuppliers);
-  setKey("items", seedItems);
+// Keys untuk master data (tidak di-reset saat re-initialization)
+const MASTER_DATA_KEYS = ["users", "suppliers", "items"] as const;
+
+// Keys untuk transaction data (bisa di-reset terpisah)
+const TRANSACTION_DATA_KEYS = [
+  "restocks",
+  "closings",
+  "claims",
+  "request_edits",
+  "settlements",
+  "expenses",
+  "deductions",
+  "ledger",
+] as const;
+
+/**
+ * Seed master data: users, suppliers, items
+ * Dipanggil sekali saat inisialisasi pertama kali
+ * Tidak akan overwrite data yang sudah ada
+ */
+export function seedMasterData() {
+  // Hanya seed kalau belum ada data
+  if (!getKey<User[]>("users", []).length) {
+    setKey("users", seedUsers);
+  }
+  if (!getKey<Supplier[]>("suppliers", []).length) {
+    setKey("suppliers", seedSuppliers);
+  }
+  if (!getKey<Item[]>("items", []).length) {
+    setKey("items", seedItems);
+  }
+}
+
+/**
+ * Seed transaction data dengan array kosong
+ * Hanya dipanggil saat first init atau saat user sengaja reset
+ */
+export function seedTransactionData() {
   setKey("restocks", [] as Restock[]);
   setKey("closings", [] as DailyClosing[]);
   setKey("claims", [] as Claim[]);
@@ -84,10 +118,30 @@ export function seedAll() {
   setKey("expenses", [] as Expense[]);
   setKey("deductions", [] as EmployeeDeduction[]);
   setKey("ledger", [] as SupplierLedgerEntry[]);
+}
+
+/**
+ * Inisialisasi lengkap — dipanggil saat app pertama kali dibuka
+ * Master data di-seed kalau belum ada, transaction data di-seed kosong
+ */
+export function seedAll() {
+  seedMasterData();
+  seedTransactionData();
   setKey("current_user", null as User | null);
   setKey("initialized", true);
 }
 
+/**
+ * Reset semua transaction data saja (untuk testing)
+ * Master data (users, suppliers, items) tetap dipertahankan
+ */
+export function resetTransactionData() {
+  seedTransactionData();
+}
+
+/**
+ * Clear semua data — untuk logout atau hard reset
+ */
 export function clearAll() {
   if (typeof window === "undefined") return;
   const PREFIX = "awfood-mvp-";

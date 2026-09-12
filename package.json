@@ -4,12 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:staging": "powershell -File switch-env.ps1 staging && next dev",
+    "dev:production": "powershell -File switch-env.ps1 production && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "seed:staging": "node scripts/seed.mjs staging",
+    "seed:staging:all": "node scripts/seed-staging.mjs",
+    "seed:items:staging": "node scripts/seed-items-suppliers.mjs staging",
+    "seed:items:prod": "node scripts/seed-items-suppliers.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

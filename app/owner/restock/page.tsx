@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { getBeverageItems, addRestock, getRestocks } from "@/lib/dummy/api";
-import { todayLocal } from "@/lib/dummy/date";
+import { todayLocal } from "@/lib/utils/date";
 import type { Restock } from "@/lib/dummy/types";
 
 export default function OwnerRestockPage() {
