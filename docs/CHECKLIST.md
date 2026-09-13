@@ -96,14 +96,16 @@
 
 ---
 
-## Phase 08 — Employee Supplier Payment ⏳
+## Phase 08 — Employee Supplier Payment [~] Cancelled
+
+> Fitur ini dibatalkan untuk first release.
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 08a | Halaman daftar pembayaran (`/employee/pembayaran`) | [ ] |
-| 08b | Form pembayaran | [ ] |
-| 08c | Server action | [ ] |
-| 08d | Vitest | [-] |
+| 08a | Halaman daftar pembayaran (`/employee/pembayaran`) | [~] |
+| 08b | Form pembayaran | [~] |
+| 08c | Server action | [~] |
+| 08d | Vitest | [~] |
 
 ---
 
@@ -148,7 +150,10 @@
 
 ---
 
-## Phase 11 — Request Edit ✅
+## Phase 11 — Request Edit [~] Cancelled (First Release)
+
+> Fitur ini **sudah diimplementasi penuh** (Supabase + UI) namun **dinonaktifkan untuk first release** lewat feature flag `requestEdit: false`.
+> Kode tetap ada di filesystem — bisa diaktifkan kapan saja.
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
@@ -162,6 +167,7 @@
 - Sudah migrasi dari localStorage ke Supabase
 - Staff tidak bisa edit closing langsung — harus ajukan request edit
 - **Bottom sheet riwayat staff menampilkan:** Kas Awal, Pengeluaran (snapshot), Rincian Pengeluaran (live), dan breakdown selisih lengkap — sama persis dengan owner
+- **Dinonaktifkan:** Tombol "Ajukan Request Edit" di-comment; menu "Req. Edit" dan "Edit" disembunyikan dari sidebar owner & staff
 
 ---
 
@@ -188,58 +194,63 @@
 
 ---
 
-## Phase 12 — Claims (Klaim) ⏳
+## Phase 12 — Claims (Klaim) [~] Cancelled
 
-> ⚠️ Feature flag OFF di first release.
-> Masih pakai localStorage dummy (`lib/dummy/api.ts`).
+> Feature flag OFF di first release. Masih pakai localStorage dummy (`lib/dummy/api.ts`).
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 12a | Employee: form klaim (`/employee/klaim`) | [ ] |
-| 12b | Owner: list klaim (`/owner/klaim`) | [ ] |
-| 12c | Owner: approve/reject klaim | [ ] |
-| 12d | Vitest | [-] |
+| 12a | Employee: form klaim (`/employee/klaim`) | [~] |
+| 12b | Owner: list klaim (`/owner/klaim`) | [~] |
+| 12c | Owner: approve/reject klaim | [~] |
+| 12d | Vitest | [~] |
 
 ---
 
-## Phase 13 — Supplier Ledger ⏳
+## Phase 13 — Supplier Ledger [~] Cancelled
 
-> ⚠️ Feature flag OFF di first release.
-> Masih pakai localStorage dummy (`lib/dummy/api.ts`).
+> Feature flag OFF di first release. Masih pakai localStorage dummy (`lib/dummy/api.ts`).
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 13a | Halaman ledger table (`/owner/ledger`) | [ ] |
-| 13b | Detail supplier (histori) | [ ] |
-| 13c | Owner payment | [ ] |
-| 13d | Vitest | [-] |
+| 13a | Halaman ledger table (`/owner/ledger`) | [~] |
+| 13b | Detail supplier (histori) | [~] |
+| 13c | Owner payment | [~] |
+| 13d | Vitest | [~] |
 
 ---
 
 ## Phase 14 — Dashboard Overview ⏳
 
 > Masih pakai localStorage dummy (`lib/dummy/api.ts`).
+> **Library:** Recharts untuk grafik (line chart tren omzet, bar chart top 5 items).
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 14a | Pending closing cards | [ ] |
-| 14b | KPI cards | [ ] |
-| 14c | Omzet trend chart | [ ] |
-| 14d | Top 5 items | [ ] |
+| 14a | Pending closing cards — alert jumlah closing `submitted` + selisih `open` > Rp5.000 | [ ] |
+| 14b | KPI cards — omzet hari ini, kas vs QRIS, status selisih | [ ] |
+| 14c | Omzet trend chart — 7 hari & 30 hari (Recharts line chart) | [ ] |
+| 14d | Top 5 items — bar chart terlaris hari ini dari `daily_closing_items` | [ ] |
+
+**Catatan:**
+- ~~Alert request edit pending~~ & ~~klaim pending~~ tidak ditampilkan (fitur OFF di first release)
+- ~~KPI utang supplier~~ tidak ditampilkan (Ledger OFF)
+- Data query ke Supabase (server actions atau RLS langsung)
 
 ---
 
 ## Phase 15 — Reports & Export ⏳
 
 > Masih pakai localStorage dummy (`lib/dummy/api.ts`).
+> **Library:** SheetJS (`xlsx`) untuk export .xlsx dan .csv.
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 15a | Sales report (`/owner/laporan`) | [ ] |
-| 15b | Supplier ledger report | [ ] |
-| 15c | Discrepancy report | [ ] |
-| 15d | Export Excel | [ ] |
-| 15e | Export CSV | [ ] |
+| 15a | Sales report (`/owner/laporan`) — filter rentang tanggal, tabel: tanggal, staff, omzet, kas, QRIS, selisih, status | [ ] |
+| 15b | ~~Supplier ledger report~~ | [~] | *Ledger OFF di first release* |
+| 15c | Discrepancy report — filter rentang tanggal, tabel: tanggal, selisih, status, resolusi | [ ] |
+| 15d | Export Excel — download .xlsx (SheetJS) | [ ] |
+| 15e | Export CSV — download .csv (SheetJS `sheet_to_csv`) | [ ] |
 
 ---
 
@@ -247,38 +258,39 @@
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 16a | Nav badges (notification count) | [ ] |
-| 16b | Loading skeletons | [ ] |
-| 16c | Toast notifications | [ ] |
-| 16d | Error boundaries | [ ] |
-| 16e | Cloudflare setup | [ ] |
-| 16f | Custom domain | [ ] |
+| 16a | Nav badges — notification count closing pending + selisih open di sidebar owner | [ ] |
+| 16b | Loading skeletons — semua halaman utama | [ ] |
+| 16c | Toast notifications — success/error feedback | [ ] |
+| 16d | Error boundaries — global + UI konsisten | [ ] |
+| 16e | Cloudflare setup — deploy ke Cloudflare Pages | [ ] |
+| 16f | Custom domain — `dashboard.awfood.id` + SSL | [ ] |
 
 ---
 
 ## Ringkasan Status
 
-| Phase | Status | Progress |
-|-------|--------|----------|
-| 01 | ✅ Clear | 5/5 |
-| 02 | ✅ Clear | 4/4 |
-| 03 | ✅ Clear | 3/3 |
-| 04 | ✅ Clear | 5/6 |
-| 05 | ✅ Clear | 5/6 |
-| 06 | ✅ Clear | 3/4 |
-| 07 | ✅ Clear | 9/9 |
-| 08 | ⏳ Pending | 0/4 |
-| 09 | ✅ Clear | 7/8 |
-| 10 | ✅ Clear | 5/6 |
-| 11 | ✅ Clear | 5/6 |
-| 09b | ✅ Clear | 7/8 |
-| 12 | ⏳ Pending | 0/4 (feature flag OFF) |
-| 13 | ⏳ Pending | 0/4 (feature flag OFF) |
-| 14 | ⏳ Pending | 0/4 |
-| 15 | ⏳ Pending | 0/5 |
-| 16 | ⏳ Pending | 0/6 |
+| Phase | Status | Progress | Catatan |
+|-------|--------|----------|---------|
+| 01 | ✅ Clear | 5/5 | |
+| 02 | ✅ Clear | 4/4 | |
+| 03 | ✅ Clear | 3/3 | |
+| 04 | ✅ Clear | 5/6 | |
+| 05 | ✅ Clear | 5/6 | |
+| 06 | ✅ Clear | 3/4 | Feature flag OFF |
+| 07 | ✅ Clear | 9/9 | |
+| 08 | [~] Cancelled | 0/4 | First release |
+| 09 | ✅ Clear | 7/8 | |
+| 10 | ✅ Clear | 5/6 | |
+| 11 | [~] Cancelled | 5/6 | Implemented, disabled via flag |
+| 09b | ✅ Clear | 7/8 | |
+| 12 | [~] Cancelled | 0/4 | First release |
+| 13 | [~] Cancelled | 0/4 | First release |
+| 14 | ⏳ Pending | 0/4 | Next priority |
+| 15 | ⏳ Pending | 0/5 | Next priority |
+| 16 | ⏳ Pending | 0/6 | Next priority |
 
-**Total:** 58/86 sub-ticket selesai (67.4%)
+**Total:** 58/86 sub-ticket selesai (67.4%)  
+**First release scope:** 58/66 (87.9%)
 
 ---
 
@@ -304,22 +316,25 @@
 | `/owner/dashboard` | Phase 14 belum dikerjakan |
 | `/owner/laporan` | Phase 15 belum dikerjakan |
 | `/owner/karyawan` | Belum ada phase |
-| `/owner/ledger` | Feature flag OFF |
-| `/owner/klaim` | Feature flag OFF |
-| `/employee/klaim` | Feature flag OFF |
+| `/owner/ledger` | Phase 13 cancelled |
+| `/owner/klaim` | Phase 12 cancelled |
+| `/employee/klaim` | Phase 12 cancelled |
+| `/owner/request-edit` | Phase 11 cancelled |
+| `/employee/request-edit` | Phase 11 cancelled |
 
 ---
 
 ## Keputusan Penting (dari memory)
 
 1. **cash_initial_staff_invisible** — Staff tidak mengubah `cash_initial` (input owner saat verifikasi). Tapi staff bisa **melihat** Kas Awal di riwayat closing untuk transparansi.
-2. **closing_submitted_no_rewrite** — Setelah submit, staff tidak bisa rewrite closing hari yang sama. Harus ajukan request edit.
+2. **closing_submitted_no_rewrite** — Setelah submit, staff tidak bisa rewrite closing hari yang sama. ~~Harus ajukan request edit~~ (Request Edit dinonaktifkan — owner harus ditanya langsung).
 3. **restock_klaim_navigation_disabled** — Menu Restock & Klaim disembunyikan dari sidebar owner (tetap bisa diakses via URL).
 4. **closing_dev_date_simulation** — Di dev, ada date picker untuk simulasi closing multi-tanggal. Di produksi, otomatis tanggal hari ini.
 5. **expense_visibility** — Entri pengeluaran: **owner-only CRUD**, tapi staff bisa **SELECT/lihat** rincian pengeluaran di riwayat closing (transparansi).
 6. **expense_channels** — Channel: CASH_LACI | QRIS_AWFOOD.
 7. **expense_snapshot** — Saat verifikasi, total pengeluaran disimpan sebagai snapshot (`expenses_cash_snapshot`, `expenses_qris_snapshot`). Closing frozen — tidak berubah meski expense ditambah/dihapus setelah verifikasi.
 8. **timezone_fix** — `todayJakarta()` dipakai untuk closing date agar server (UTC) dan client (Asia/Jakarta) konsisten.
+9. **request_edit_disabled_first_release** — Seluruh fitur Request Edit (staff ajukan + owner approve) dinonaktifkan untuk first release lewat feature flag `requestEdit: false`. Kode tetap ada, tombol di-comment, menu disembunyikan.
 
 ---
 

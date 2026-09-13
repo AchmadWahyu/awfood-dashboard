@@ -1,6 +1,7 @@
 # Requirement Web Dashboard AW Food V2
 
-> **Status implementasi (per 2026-08):** Dokumen ini adalah target produksi (Next.js + Supabase). MVP saat ini berjalan dengan **data dummy di browser** (`lib/dummy/*`) — lihat `README.md` untuk detail status MVP. Fitur Restock, Klaim, dan Supplier Ledger **OFF di first release** (sampai waktu yang belum ditentukan), tapi **bisa diaktifkan kapan saja** via feature flag (`lib/feature-flags.ts`). Ketiganya tetap menjadi bagian dari requirement ini.
+> **Status implementasi (per 2026-09):** Dokumen ini adalah **target produksi** (Next.js + Supabase). MVP saat ini berjalan dengan **data dummy di browser** (`lib/dummy/*`) — lihat `README.md` untuk detail status MVP.  
+> **Fitur OFF di first release:** Restock, Klaim, Supplier Ledger, dan **Request Edit** (sampai waktu yang belum ditentukan). Masing-masing **bisa diaktifkan kapan saja** via feature flag (`lib/feature-flags.ts`). Halaman & kode tetap ada — hanya disembunyikan dari navigasi. Semua tetap menjadi bagian dari requirement produksi.
 
 ## 1. Profil Bisnis
 
@@ -54,8 +55,8 @@ Pada form penutupan tablet, data dikelompokkan per supplier. Setelah karyawan me
 
 ### 5.3 Hak Akses & Pembatasan Tampilan
 
-- **Akses Karyawan (Bare Minimum):** Hanya dapat mengakses form Input Penutupan Toko, Stok Akhir, dan pengajuan Request Edit. Karyawan tidak dapat melihat omzet, laporan keuangan, supplier ledger, atau halaman verifikasi.
-- **Akses Owner:** Memiliki akses penuh ke seluruh modul (Master Data, Supplier Ledger, Verifikasi QRIS, Rekonsiliasi Kas, Approval Request Edit, Laporan Keuangan, dan Export Data).
+- **Akses Karyawan (Bare Minimum):** Hanya dapat mengakses form Input Penutupan Toko dan Stok Akhir. ~~pengajuan Request Edit~~ *(OFF di first release)*. Karyawan tidak dapat melihat omzet, laporan keuangan, supplier ledger, atau halaman verifikasi.
+- **Akses Owner:** Memiliki akses penuh ke seluruh modul (Master Data, Supplier Ledger, Verifikasi QRIS, Rekonsiliasi Kas, ~~Approval Request Edit~~ *(OFF di first release)*, Laporan Keuangan, dan Export Data).
 
 ### 5.4 Master Data & Fleksibilitas Harga
 
@@ -112,7 +113,8 @@ Sistem menyimpan:
 
 ### 5.8 Request Edit & Jejak Audit
 
-**Request Edit:** Jika karyawan salah input setelah submit, wajib mengajukan Request Edit. Sistem mencatat ID karyawan, timestamp, dan nilai sebelum vs sesudah. Perubahan baru aktif setelah Approval Owner.
+**Request Edit:** Jika karyawan salah input setelah submit, wajib mengajukan Request Edit. Sistem mencatat ID karyawan, timestamp, dan nilai sebelum vs sesudah. Perubahan baru aktif setelah Approval Owner.  
+> *(First release: Request Edit dinonaktifkan. Jika staff salah input, owner harus ditanya langsung atau dihandle di luar sistem.)*
 
 **Input Susulan (Backdate):** Karyawan diizinkan input penutupan susulan jika terjadi kendala teknis hari sebelumnya.
 
@@ -157,7 +159,7 @@ Minuman adalah barang milik owner sendiri, bukan barang konsinyasi supplier. Uan
 ### 5.12 Fitur Sistem & Laporan
 
 - **Export Data:** Laporan penjualan, supplier ledger, dan riwayat selisih dapat diunduh dalam format Excel (.xlsx) dan CSV.
-- **Indikator Notifikasi Owner:** Badge icon / titik merah pada menu dashboard untuk memberi tahu Owner jika ada Request Edit pending, selisih > Rp5.000, atau klaim barang pending.
+- **Indikator Notifikasi Owner:** Badge icon / titik merah pada menu dashboard untuk memberi tahu Owner jika ada selisih > Rp5.000. ~~Request Edit pending~~ dan ~~klaim barang pending~~ *(OFF di first release — tidak ada badge untuk fitur yang dimatikan).*
 - **Siklus Stok Konsinyasi (Reset Harian):** Stok sisa kue konsinyasi selalu direset ke 0 setiap akhir hari (tidak ada rollover/carryover).
 - **Dashboard Overview:** Menampilkan Pending Action Alert, Kartu KPI (Omzet, Status Kas vs QRIS, Utang Supplier, Status Selisih), serta Grafik Tren Omzet & Top 5 Kue Terlaris.
 
@@ -169,7 +171,26 @@ Minuman adalah barang milik owner sendiri, bukan barang konsinyasi supplier. Uan
 - **Registrasi Akun:** Seed manual -- Owner membuat akun karyawan dari dashboard.
 - **Restock Minuman:** Owner-only.
 
-## 6. Risiko yang Harus Ditangani Sistem
+## 6. Prinsip Produk
+
+1. **Post-hoc accuracy over real-time recording.** Sistem cocok dengan alur kerja nyata — input setelah tutup — daripada memaksakan pencatatan per-transaksi saat jam sibuk.
+2. **Traceability before blame.** Setiap aksi tercatat ke user dan timestamp. Selisih ditelusuri, tidak otomatis dipidana.
+3. **Owner in control, employee empowered.** Karyawan bisa menyelesaikan penutupan secara mandiri; owner memegang otoritas final atas approval, verifikasi, dan keputusan finansial.
+4. **Simple and honest.** UI straightforward dan trustworthy, tidak gamified atau persuasive. Alat untuk menyelesaikan pekerjaan dengan akurat.
+
+## 7. Preferensi Desain
+
+- **Penutupan flow — UI Variant B (Accordion) preferred.** Accordion per supplier dengan tabel di dalamnya, ringkasan omzet real-time, input kas fisik di bagian terpisah, dan tombol simpan di grand total bar. Dinilai paling cocok untuk karyawan di tablet karena: (1) fokus per supplier tanpa overload informasi, (2) navigasi sederhana tanpa tombol prev/next, (3) grand total dan kas fisik selalu terlihat.
+
+## 8. Aksesibilitas & Konteks Penggunaan
+
+- **Stall environment:** Lapak outdoor dekat Kukel UI, ramai saat semester aktif, sepi saat libur.
+- **Hardware:** Tablet digunakan karyawan di lapak; owner menggunakan dashboard di perangkat pribadi (HP/komputer) di malam hari.
+- **Pencahayaan:** Outdoor lighting, kemungkinan glare — UI perlu kontras cukup.
+- **Kondisi karyawan:** Menggunakan di akhir shift ketika mungkin sudah lelah.
+- **Bahasa:** Bahasa Indonesia.
+
+## 9. Risiko yang Harus Ditangani Sistem
 
 - Manipulasi stok akhir untuk menutup pengambilan uang tunai.
 - Penggunaan alasan barang rusak, basi, dimakan, atau bonus tanpa bukti.
