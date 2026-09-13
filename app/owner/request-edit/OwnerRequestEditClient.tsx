@@ -4,10 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import type { RequestEdit, DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getAllRequestEdits, getRequestEditDetail, approveRequestEdit, rejectRequestEdit } from "./actions";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_BADGE: Record<string, string> = {
   pending: "bg-ruled/30 text-ink-light",
@@ -164,7 +161,7 @@ export default function OwnerRequestEditClient({
                 className="w-full text-left rounded-xl border border-notch-border bg-paper-light px-4 py-3 shadow-sm hover:bg-paper transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold text-ink min-w-0 truncate">{closingData ? `Closing ${closingData.date}` : r.closing_id}</span>
+                  <span className="text-sm font-bold text-ink min-w-0 truncate">{closingData ? `Closing ${formatDateDisplay(closingData.date)}` : r.closing_id}</span>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${STATUS_BADGE[r.status]}`}>{STATUS_LABEL[r.status]}</span>
                 </div>
                 <div className="mt-1 flex items-center justify-between gap-2 text-xs">
@@ -202,7 +199,7 @@ export default function OwnerRequestEditClient({
 
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-ink">
-                Detail Request Edit {closing ? `(${closing.date})` : ""}
+                Detail Request Edit {closing ? `(${formatDateDisplay(closing.date)})` : ""}
               </h3>
               <button onClick={closeDetail} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup detail">
                 Tutup

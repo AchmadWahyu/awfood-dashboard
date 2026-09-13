@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import type { DailyClosing, Item, Supplier, ClosingItem, RequestEdit } from "@/lib/dummy/types";
 import { getRequestEditsByStaff, getClosingDetailForRequestEdit, createRequestEdit } from "./actions";
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 function NotebookInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -20,10 +22,6 @@ function NotebookInput({ value, onChange }: { value: number; onChange: (v: numbe
 
 function calcTerjual(awal: number, akhir: number) {
   return Math.max(0, (awal || 0) - (akhir || 0));
-}
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
 }
 
 interface Entry {
@@ -244,7 +242,7 @@ export default function EmployeeRequestEditClient({
             className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker"
           >
             <option value="">Pilih closing</option>
-            {closings.map((c) => <option key={c.id} value={c.id}>{c.date} — {c.staff_name}</option>)}
+            {closings.map((c) => <option key={c.id} value={c.id}>                {formatDateDisplay(c.date)} — {c.staff_name}</option>)}
           </select>
         </div>
 
@@ -329,7 +327,7 @@ export default function EmployeeRequestEditClient({
 
             <div>
               <label className="block text-xs text-ink-light mb-1">Total kas di laci saat tutup</label>
-              <input type="text" inputMode="numeric" value={cashPhysical} onChange={(e) => setCashPhysical(e.target.value.replace(/\D/g, ""))} placeholder="0" className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
+              <FormattedNumberInput value={cashPhysical} onChange={setCashPhysical} placeholder="0" className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
             </div>
 
             <div>
@@ -366,7 +364,7 @@ export default function EmployeeRequestEditClient({
                 className="w-full text-left rounded-xl border border-notch-border bg-paper-light px-4 py-3 text-sm shadow-sm hover:bg-paper transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-ink min-w-0 truncate">{closing ? `Closing ${closing.date}` : r.closing_id} — {formatRp(r.items.reduce((s, i) => s + i.total_rp, 0))}</span>
+                  <span className="font-medium text-ink min-w-0 truncate">{closing ? `Closing ${formatDateDisplay(closing.date)}` : r.closing_id} — {formatRp(r.items.reduce((s, i) => s + i.total_rp, 0))}</span>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${STATUS_BADGE[r.status]}`}>{STATUS_LABEL[r.status]}</span>
                 </div>
                 <p className="mt-1 text-xs text-ink-light break-words">{r.reason}</p>
@@ -389,7 +387,7 @@ export default function EmployeeRequestEditClient({
 
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-ink">
-                Detail Request Edit {closings.find((c) => c.id === selectedReq.closing_id) ? `(${closings.find((c) => c.id === selectedReq.closing_id)!.date})` : ""}
+                Detail Request Edit {closings.find((c) => c.id === selectedReq.closing_id) ? `(${formatDateDisplay(closings.find((c) => c.id === selectedReq.closing_id)!.date)})` : ""}
               </h3>
               <button onClick={closeDetail} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup detail">
                 Tutup
@@ -397,7 +395,7 @@ export default function EmployeeRequestEditClient({
             </div>
 
             <div className="mt-2 flex items-center gap-2 text-xs text-ink-light">
-              <span>{new Date(selectedReq.requested_at).toLocaleString("id-ID")}</span>
+              <span>{formatDateTime(selectedReq.requested_at)}</span>
               <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${STATUS_BADGE[selectedReq.status]}`}>{STATUS_LABEL[selectedReq.status]}</span>
             </div>
 

@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { submitClosing } from "./actions";
 import type { Supplier, Item, ClosingItem, ClosingRecord, ClosingSummaryItem } from "./actions";
 import { todayJakarta } from "@/lib/utils/date";
+import { formatRp, formatDateTime } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 function NotebookInput({ value, onChange, readOnly }: { value: number; onChange: (v: number) => void; readOnly?: boolean }) {
   return (
@@ -16,10 +18,6 @@ function NotebookInput({ value, onChange, readOnly }: { value: number; onChange:
       className="w-14 bg-transparent text-center outline-none border-0 border-b-2 border-ruled focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
     />
   );
-}
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
 }
 
 export default function EmployeePenutupanClient({
@@ -236,7 +234,7 @@ export default function EmployeePenutupanClient({
             </svg>
           </div>
           <h2 className="text-xl font-bold text-ink">Penutupan Berhasil Disimpan</h2>
-          <p className="mt-1 text-sm text-ink-light">{closing.created_at}</p>
+          <p className="mt-1 text-sm text-ink-light">{formatDateTime(closing.created_at)}</p>
           <div className="mx-auto mt-6 max-w-sm space-y-2 border-t border-notch-border pt-5 text-left">
             {Array.from(supplierGroups.values()).map((g) => (
               <div key={g.name} className="flex items-center justify-between text-sm">
@@ -404,15 +402,13 @@ export default function EmployeePenutupanClient({
       {/* Kas Fisik */}
       <div className="rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
         <h3 className="mb-3 text-sm font-bold text-marker">Kas</h3>
-        <div>
+          <div>
           <label className="block text-xs text-ink-light mb-1.5">Total uang kas di laci saat tutup</label>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-ink">Rp</span>
-            <input
-              type="text"
-              inputMode="numeric"
+            <FormattedNumberInput
               value={cashPhysical}
-              onChange={(e) => setCashPhysical(e.target.value.replace(/\D/g, ""))}
+              onChange={setCashPhysical}
               placeholder="0"
               className="w-48 rounded-xl border-2 border-ruled bg-transparent px-4 py-2.5 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
             />

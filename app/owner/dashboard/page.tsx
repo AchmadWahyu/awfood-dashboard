@@ -4,11 +4,8 @@ import { useState, useMemo } from "react";
 import { useSyncStorage } from "@/lib/dummy/sync";
 import { getClosings, getItems, getPendingRequestEdits } from "@/lib/dummy/api";
 import { todayLocal } from "@/lib/utils/date";
+import { formatRp } from "@/lib/utils/format";
 import Link from "next/link";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
 
 export default function OwnerDashboardPage() {
   const [version, setVersion] = useState(0);

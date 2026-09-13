@@ -4,10 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getClosingsByStaff, getClosingDetail } from "./actions";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
@@ -147,7 +144,7 @@ export default function EmployeeRiwayatClient({
                 className="w-full text-left rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm hover:bg-paper transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-ink">{c.date}</span>
+                  <span className="text-sm font-bold text-ink">{formatDateDisplay(c.date)}</span>
                   <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${STATUS_STYLE[c.status]}`}>{STATUS_LABEL[c.status]}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -182,7 +179,7 @@ export default function EmployeeRiwayatClient({
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ruled" />
 
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-ink">Detail Penutupan {selected.date}</h3>
+              <h3 className="text-sm font-bold text-ink">Detail Penutupan {formatDateDisplay(selected.date)}</h3>
               <button onClick={closeDetail} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup detail">
                 Tutup
               </button>
@@ -353,7 +350,7 @@ export default function EmployeeRiwayatClient({
               {selected.verified_at && (
                 <div className="flex items-center justify-between text-xs text-ink-light">
                   <span>Diverifikasi</span>
-                  <span>{new Date(selected.verified_at).toLocaleString("id-ID")}</span>
+                  <span>{formatDateTime(selected.verified_at)}</span>
                 </div>
               )}
             </div>

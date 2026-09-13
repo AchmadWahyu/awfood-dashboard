@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { createItem, updateItem, toggleItemActive, deleteItem, getItems, getBeverageItems } from "./actions";
 import type { Item, ItemType } from "./actions";
+import { formatNumber } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 export default function OwnerItemsClient({ 
   initialItems, 
@@ -109,11 +111,11 @@ export default function OwnerItemsClient({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Harga Modal</label>
-            <input type="number" value={form.cost_price} onChange={(e) => setForm({ ...form, cost_price: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
+            <FormattedNumberInput value={form.cost_price} onChange={(raw) => setForm({ ...form, cost_price: raw })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
           </div>
           <div>
             <label className="block text-xs text-ink-light mb-1">Harga Jual</label>
-            <input type="number" value={form.selling_price} onChange={(e) => setForm({ ...form, selling_price: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
+            <FormattedNumberInput value={form.selling_price} onChange={(raw) => setForm({ ...form, selling_price: raw })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
           </div>
         </div>
         <div className="flex gap-2">
@@ -131,8 +133,8 @@ export default function OwnerItemsClient({
                 <p className="text-sm font-bold text-ink">{i.name} {i.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
                 <p className="text-xs text-ink-light">
                   {i.category === "KONSINYASI_KUE" ? `Konsinyasi${sup ? ` — ${sup.name}` : ""}` : i.category === "MINUMAN_OWNER" ? "Minuman Owner" : "Ayam Penyet"} · 
-                  Beli {i.cost_price.toLocaleString("id-ID")} · 
-                  Jual {i.selling_price.toLocaleString("id-ID")}
+                  Beli {formatNumber(i.cost_price)} · 
+                  Jual {formatNumber(i.selling_price)}
                 </p>
               </div>
               <div className="flex items-center gap-2">

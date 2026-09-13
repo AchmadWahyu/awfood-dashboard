@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSyncStorage } from "@/lib/dummy/sync";
 import { getClosings, getClosingById, getItems, getExpenses, getSettlements, getDeductions, getSuppliers } from "@/lib/dummy/api";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
@@ -16,10 +17,6 @@ const STATUS_STYLE: Record<string, string> = {
   submitted: "bg-marker-light text-marker",
   verified: "bg-notch-success text-notch-success-text",
 };
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
 
 function selisihView(d: number | null) {
   if (d == null) return { text: "-", cls: "text-ink-light" };
@@ -194,7 +191,7 @@ export default function OwnerLaporanPage() {
                 className="w-full text-left rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm hover:bg-paper transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-ink">{c.date}</span>
+                  <span className="text-sm font-bold text-ink">{formatDateDisplay(c.date)}</span>
                   <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${STATUS_STYLE[c.status]}`}>{STATUS_LABEL[c.status]}</span>
                 </div>
                 <div className="flex items-center justify-between mb-3">
@@ -341,7 +338,7 @@ export default function OwnerLaporanPage() {
               {selected.verified_at && (
                 <div className="flex items-center justify-between text-xs text-ink-light">
                   <span>Diverifikasi</span>
-                  <span>{new Date(selected.verified_at).toLocaleString("id-ID")}</span>
+                  <span>{formatDateTime(selected.verified_at)}</span>
                 </div>
               )}
             </div>

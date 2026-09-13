@@ -3,11 +3,9 @@
 import { useState, useMemo } from "react";
 import { getSuppliers, getSettlements, addSettlement, getClosings, addLedgerEntry } from "@/lib/dummy/api";
 import { todayLocal } from "@/lib/utils/date";
+import { formatRp } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 import type { SupplierSettlement, SupplierLedgerEntry } from "@/lib/dummy/types";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
 
 export default function OwnerLedgerPage() {
   const suppliers = useMemo(() => getSuppliers().filter((s) => s.is_active), []);
@@ -97,7 +95,7 @@ export default function OwnerLedgerPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-ink-light mb-1">Nominal</label>
-                <input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
+                <FormattedNumberInput value={form.amount} onChange={(raw) => setForm({ ...form, amount: raw })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
               </div>
               <div>
                 <label className="block text-xs text-ink-light mb-1">Metode</label>

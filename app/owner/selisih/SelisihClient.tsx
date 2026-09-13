@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getClosingsWithDiscrepancy, getClosingDetail, resolveDiscrepancy, addDeduction } from "./actions";
 import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_BADGE: Record<string, string> = {
   open: "bg-marker-light text-marker",
@@ -208,7 +205,7 @@ export default function SelisihClient({
                 className="w-full text-left rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm hover:bg-paper transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-ink">{c.date}</span>
+                  <span className="text-sm font-bold text-ink">{formatDateDisplay(c.date)}</span>
                   <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${STATUS_BADGE[c.discrepancy_status || "open"]}`}>
                     {STATUS_LABEL[c.discrepancy_status || "open"]}
                   </span>
@@ -252,7 +249,7 @@ export default function SelisihClient({
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ruled" />
 
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-ink">Detail Selisih {selected.date}</h3>
+              <h3 className="text-sm font-bold text-ink">Detail Selisih {formatDateDisplay(selected.date)}</h3>
               <button onClick={closeDetail} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup detail">
                 Tutup
               </button>
@@ -425,7 +422,7 @@ export default function SelisihClient({
               {selected.verified_at && (
                 <div className="flex items-center justify-between text-xs text-ink-light">
                   <span>Diverifikasi</span>
-                  <span>{new Date(selected.verified_at).toLocaleString("id-ID")}</span>
+                  <span>{formatDateTime(selected.verified_at)}</span>
                 </div>
               )}
             </div>
