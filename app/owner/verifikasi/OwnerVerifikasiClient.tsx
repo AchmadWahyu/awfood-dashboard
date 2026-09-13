@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import type { DailyClosing, Item, Supplier, Expense } from "@/lib/dummy/types";
 import { getSubmittedClosings, getClosingDetail, verifyClosing, rejectClosing } from "./actions";
 import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
-}
+import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 interface SupplierGroup {
   supplier: Supplier | undefined;
@@ -211,7 +209,7 @@ export default function OwnerVerifikasiClient({
               className="w-full text-left rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm hover:bg-paper transition-colors"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-ink">{c.date}</span>
+                  <span className="text-sm font-bold text-ink">{formatDateDisplay(c.date)}</span>
                 <span className="text-xs text-ink-light">{c.staff_name}</span>
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-light">
@@ -247,7 +245,7 @@ export default function OwnerVerifikasiClient({
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-bold text-ink">
-                Detail Closing {selected.date}
+                Detail Closing {formatDateDisplay(selected.date)}
               </h3>
               <button
                 onClick={closeDetail}
@@ -429,13 +427,9 @@ export default function OwnerVerifikasiClient({
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-semibold text-ink">Rp</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
+                  <FormattedNumberInput
                     value={cashInitialInput}
-                    onChange={(e) =>
-                      setCashInitialInput(e.target.value.replace(/\D/g, ""))
-                    }
+                    onChange={setCashInitialInput}
                     placeholder="0"
                     className="w-full rounded-xl border-2 border-ruled bg-transparent px-4 py-2 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
                   />
@@ -449,13 +443,9 @@ export default function OwnerVerifikasiClient({
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-semibold text-ink">Rp</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
+                  <FormattedNumberInput
                     value={qrisInput}
-                    onChange={(e) =>
-                      setQrisInput(e.target.value.replace(/\D/g, ""))
-                    }
+                    onChange={setQrisInput}
                     placeholder="0"
                     className="w-full rounded-xl border-2 border-ruled bg-transparent px-4 py-2 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
                   />

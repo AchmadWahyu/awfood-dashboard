@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { submitClosing } from "./actions";
 import type { Supplier, Item, ClosingItem, ClosingRecord, ClosingSummaryItem } from "./actions";
 import { todayJakarta } from "@/lib/utils/date";
+import { formatRp, formatDateTime } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 function NotebookInput({ value, onChange, readOnly }: { value: number; onChange: (v: number) => void; readOnly?: boolean }) {
   return (
@@ -16,10 +18,6 @@ function NotebookInput({ value, onChange, readOnly }: { value: number; onChange:
       className="w-14 bg-transparent text-center outline-none border-0 border-b-2 border-ruled focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
     />
   );
-}
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
 }
 
 export default function EmployeePenutupanClient({
@@ -41,7 +39,7 @@ export default function EmployeePenutupanClient({
   const [submittedAt, setSubmittedAt] = useState(existingClosing?.created_at || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const suppliers = initialSuppliers;
   const allItems = initialItems;
   const bevItems = initialBeverages;
@@ -76,6 +74,32 @@ export default function EmployeePenutupanClient({
   const [beverageInputs, setBeverageInputs] = useState(beverageEntries);
   const [searchQuery, setSearchQuery] = useState("");
   const [openSupplierId, setOpenSupplierId] = useState<string | null>(suppliers[0]?.id || null);
+
+  const LS_KEY = `awfood-penutupan-draft-${closingDate}`;
+
+  // Load draft dari localStorage saat mount (hanya jika belum submit)
+  useEffect(() => {
+    if (isSubmitted) return;
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft.supplierInputs) setSupplierInputs(draft.supplierInputs);
+        if (draft.beverageInputs) setBeverageInputs(draft.beverageInputs);
+        if (draft.cashPhysical !== undefined) setCashPhysical(draft.cashPhysical);
+      }
+    } catch {
+      // ignore corrupted draft
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-save ke localStorage setiap kali data berubah
+  useEffect(() => {
+    if (isSubmitted) return;
+    const draft = { supplierInputs, beverageInputs, cashPhysical };
+    localStorage.setItem(LS_KEY, JSON.stringify(draft));
+  }, [supplierInputs, beverageInputs, cashPhysical, LS_KEY, isSubmitted]);
 
   const updateSupplierStok = useCallback(
     (supplierId: string, itemId: string, field: "openingStock" | "endingStock", value: number) => {
@@ -138,11 +162,16 @@ export default function EmployeePenutupanClient({
     return supTotal + bevTotal;
   }, [supplierInputs, beverageInputs]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleOpenConfirm = () => {
+    if (isSubmitted) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
     if (isSubmitted) return;
     setError("");
     setIsSubmitting(true);
+    setShowConfirmModal(false);
 
     const items: ClosingItem[] = [];
     for (const si of supplierInputs) {
@@ -176,6 +205,7 @@ export default function EmployeePenutupanClient({
     try {
       const result = await submitClosing(formData);
       setSubmittedAt(new Date().toISOString());
+      localStorage.removeItem(LS_KEY);
     } catch (err: any) {
       setError(err.message || "Gagal menyimpan closing. Coba lagi.");
       console.error(err);
@@ -204,7 +234,7 @@ export default function EmployeePenutupanClient({
             </svg>
           </div>
           <h2 className="text-xl font-bold text-ink">Penutupan Berhasil Disimpan</h2>
-          <p className="mt-1 text-sm text-ink-light">{closing.created_at}</p>
+          <p className="mt-1 text-sm text-ink-light">{formatDateTime(closing.created_at)}</p>
           <div className="mx-auto mt-6 max-w-sm space-y-2 border-t border-notch-border pt-5 text-left">
             {Array.from(supplierGroups.values()).map((g) => (
               <div key={g.name} className="flex items-center justify-between text-sm">
@@ -372,15 +402,13 @@ export default function EmployeePenutupanClient({
       {/* Kas Fisik */}
       <div className="rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
         <h3 className="mb-3 text-sm font-bold text-marker">Kas</h3>
-        <div>
+          <div>
           <label className="block text-xs text-ink-light mb-1.5">Total uang kas di laci saat tutup</label>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-ink">Rp</span>
-            <input
-              type="text"
-              inputMode="numeric"
+            <FormattedNumberInput
               value={cashPhysical}
-              onChange={(e) => setCashPhysical(e.target.value.replace(/\D/g, ""))}
+              onChange={setCashPhysical}
               placeholder="0"
               className="w-48 rounded-xl border-2 border-ruled bg-transparent px-4 py-2.5 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
             />
@@ -395,13 +423,51 @@ export default function EmployeePenutupanClient({
           <p className="text-xl font-bold text-marker tabular-nums">{formatRp(grandTotal)}</p>
         </div>
         <button
-          onClick={handleSubmit}
+          onClick={handleOpenConfirm}
           disabled={isSubmitting}
           className="w-full sm:w-auto rounded-xl bg-marker px-7 py-3 text-sm font-bold text-white hover:bg-marker-hover transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Menyimpan..." : "Simpan Penutupan"}
         </button>
       </div>
+
+      {/* Modal Konfirmasi Submit */}
+      {showConfirmModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowConfirmModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Konfirmasi simpan penutupan"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl border border-notch-border bg-paper-light p-6 shadow-xl"
+          >
+            <h3 className="text-base font-bold text-ink mb-2">
+              Konfirmasi
+            </h3>
+            <p className="text-sm text-ink-light mb-6">
+              Yakin datanya udah bener?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 rounded-xl border border-notch-border px-4 py-2.5 text-sm font-bold text-ink-light hover:bg-paper transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleConfirmSubmit}
+                disabled={isSubmitting}
+                className="flex-1 rounded-xl bg-marker px-4 py-2.5 text-sm font-bold text-white hover:bg-marker-hover transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? "Menyimpan..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

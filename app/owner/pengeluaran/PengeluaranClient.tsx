@@ -3,6 +3,8 @@
 import { useState, useMemo, useTransition } from "react";
 import { addExpense, deleteExpense } from "./actions";
 import type { Expense, ExpenseCategory, Pocket } from "@/lib/dummy/types";
+import { formatRp, formatDateDisplay } from "@/lib/utils/format";
+import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "BAHAN_MINUMAN", label: "Bahan Minuman" },
@@ -19,10 +21,6 @@ function todayLocal() {
   const offset = d.getTimezoneOffset();
   const local = new Date(d.getTime() - offset * 60 * 1000);
   return local.toISOString().split("T")[0];
-}
-
-function formatRp(n: number) {
-  return `Rp ${n.toLocaleString("id-ID")}`;
 }
 
 export default function PengeluaranClient({
@@ -148,10 +146,9 @@ export default function PengeluaranClient({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Nominal</label>
-            <input
-              type="number"
+            <FormattedNumberInput
               value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              onChange={(raw) => setForm({ ...form, amount: raw })}
               required
               className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker"
             />
@@ -211,7 +208,7 @@ export default function PengeluaranClient({
                   : CATEGORIES.find((c) => c.value === e.category)?.label}
               </p>
               <p className="text-xs text-ink-light">
-                {e.date} · {e.pocket === "CASH_LACI" ? "Cash Laci" : "QRIS"}{" "}
+                {formatDateDisplay(e.date)} · {e.pocket === "CASH_LACI" ? "Cash Laci" : "QRIS"}{" "}
                 {e.note && `· ${e.note}`}
               </p>
             </div>
