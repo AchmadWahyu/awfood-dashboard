@@ -355,7 +355,8 @@ export default function EmployeeRiwayatClient({
               )}
             </div>
 
-            {selected.status !== "draft" && (
+            {/* Request Edit — dinonaktifkan di first release */}
+            {/* {selected.status !== "draft" && (
               <div className="border-t border-ruled pt-3 mt-4">
                 <button
                   onClick={() => router.push(`/employee/request-edit?closing=${selected.id}`)}
@@ -364,7 +365,7 @@ export default function EmployeeRiwayatClient({
                   Ajukan Request Edit
                 </button>
               </div>
-            )}
+            )} */}
 
             {showInfo && (
               <div className="absolute inset-0 z-50 flex flex-col bg-paper-light rounded-t-3xl p-6 pb-24 overflow-y-auto">

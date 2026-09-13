@@ -252,9 +252,10 @@ export default function EmployeePenutupanClient({
             </div>
           </div>
           <div className="mt-6 flex items-center justify-center gap-3">
-            <a href="/employee/request-edit" className="rounded-xl border-2 border-marker px-6 py-2.5 text-sm font-bold text-marker hover:bg-marker-light transition-colors">
+            {/* Request Edit — dinonaktifkan di first release */}
+            {/* <a href="/employee/request-edit" className="rounded-xl border-2 border-marker px-6 py-2.5 text-sm font-bold text-marker hover:bg-marker-light transition-colors">
               Ajukan Request Edit
-            </a>
+            </a> */}
             <a href="/employee/riwayat" className="rounded-xl border-2 border-notch-border px-6 py-2.5 text-sm font-medium text-ink-light hover:bg-paper transition-colors">
               Lihat Riwayat
             </a>

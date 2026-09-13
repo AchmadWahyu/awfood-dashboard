@@ -5,6 +5,7 @@ export const FEATURE_FLAGS = {
   restock: false,
   klaim: false,
   ledger: false,
+  requestEdit: false,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;

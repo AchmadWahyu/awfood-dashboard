@@ -19,7 +19,7 @@ const NAV: NavItem[] = [
   { href: "/owner/verifikasi", label: "Verifikasi" },
   { href: "/owner/selisih", label: "Selisih" },
   { href: "/owner/klaim", label: "Klaim", flag: "klaim" as FeatureFlag },
-  { href: "/owner/request-edit", label: "Req. Edit" },
+  { href: "/owner/request-edit", label: "Req. Edit", flag: "requestEdit" as FeatureFlag },
   { href: "/owner/ledger", label: "Ledger", flag: "ledger" as FeatureFlag },
   { href: "/owner/pengeluaran", label: "Pengeluaran" },
   { href: "/owner/laporan", label: "Laporan" },

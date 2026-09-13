@@ -50,9 +50,10 @@ export default function OwnerDashboardPage() {
       {(pendingEdits.length > 0 || openDiscrepancies.length > 0) && (
         <div className="rounded-2xl border border-marker/30 bg-marker-light/40 p-4 space-y-2">
           <h3 className="text-sm font-bold text-marker">⚠️ Pending Action</h3>
-          {pendingEdits.length > 0 && (
+          {/* Request Edit — dinonaktifkan di first release */}
+          {/* {pendingEdits.length > 0 && (
             <Link href="/owner/request-edit" className="block text-xs text-ink hover:underline">{pendingEdits.length} request edit menunggu approval</Link>
-          )}
+          )} */}
           {openDiscrepancies.length > 0 && (
             <Link href="/owner/selisih" className="block text-xs text-ink hover:underline">{openDiscrepancies.length} selisih terbuka memerlukan investigasi</Link>
           )}
