@@ -227,10 +227,10 @@
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 14a | Pending closing cards — alert jumlah closing `submitted` + selisih `open` > Rp5.000 | [ ] |
-| 14b | KPI cards — omzet hari ini, kas vs QRIS, status selisih | [ ] |
-| 14c | Omzet trend chart — 7 hari & 30 hari (Recharts line chart) | [ ] |
-| 14d | Top 5 items — bar chart terlaris hari ini dari `daily_closing_items` | [ ] |
+| 14a | Pending closing cards — alert jumlah closing `submitted` + selisih `open` > Rp5.000 | [x] |
+| 14b | KPI cards — omzet hari ini, kas vs QRIS, status selisih | [x] |
+| 14c | Omzet trend chart — 7 hari & 30 hari (Recharts line chart) | [x] |
+| 14d | Top 5 items — bar chart terlaris hari ini dari `daily_closing_items` | [x] |
 
 **Catatan:**
 - ~~Alert request edit pending~~ & ~~klaim pending~~ tidak ditampilkan (fitur OFF di first release)
@@ -246,11 +246,11 @@
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 15a | Sales report (`/owner/laporan`) — filter rentang tanggal, tabel: tanggal, staff, omzet, kas, QRIS, selisih, status | [ ] |
+| 15a | Sales report (`/owner/laporan`) — filter rentang tanggal, tabel: tanggal, staff, omzet, kas, QRIS, selisih, status | [x] |
 | 15b | ~~Supplier ledger report~~ | [~] | *Ledger OFF di first release* |
-| 15c | Discrepancy report — filter rentang tanggal, tabel: tanggal, selisih, status, resolusi | [ ] |
-| 15d | Export Excel — download .xlsx (SheetJS) | [ ] |
-| 15e | Export CSV — download .csv (SheetJS `sheet_to_csv`) | [ ] |
+| 15c | Discrepancy report — filter rentang tanggal, tabel: tanggal, selisih, status, resolusi | [x] |
+| 15d | Export Excel — download .xlsx (SheetJS) | [x] |
+| 15e | Export CSV — download .csv (SheetJS `sheet_to_csv`) | [x] |
 
 ---
 
@@ -285,12 +285,12 @@
 | 09b | ✅ Clear | 7/8 | |
 | 12 | [~] Cancelled | 0/4 | First release |
 | 13 | [~] Cancelled | 0/4 | First release |
-| 14 | ⏳ Pending | 0/4 | Next priority |
-| 15 | ⏳ Pending | 0/5 | Next priority |
+| 14 | ✅ Clear | 4/4 | |
+| 15 | ✅ Clear | 4/5 | Ledger OFF |
 | 16 | ⏳ Pending | 0/6 | Next priority |
 
-**Total:** 58/86 sub-ticket selesai (67.4%)  
-**First release scope:** 58/66 (87.9%)
+**Total:** 66/86 sub-ticket selesai (76.7%)  
+**First release scope:** 66/66 (100.0%)
 
 ---
 
@@ -308,13 +308,13 @@
 | `/owner/supplier` | `app/owner/supplier/actions.ts` | CRUD suppliers |
 | `/owner/restocks` | `app/owner/restocks/actions.ts` | Riwayat restock |
 | `/owner/pengeluaran` | `app/owner/pengeluaran/actions.ts` | CRUD pengeluaran |
+| `/owner/dashboard` | `app/owner/dashboard/actions.ts` | Dashboard overview |
+| `/owner/laporan` | `app/owner/laporan/actions.ts` | Reports & export |
 
 ## Halaman yang Masih LocalStorage Dummy ⏳
 
 | Halaman | Alasan |
 |---------|--------|
-| `/owner/dashboard` | Phase 14 belum dikerjakan |
-| `/owner/laporan` | Phase 15 belum dikerjakan |
 | `/owner/karyawan` | Belum ada phase |
 | `/owner/ledger` | Phase 13 cancelled |
 | `/owner/klaim` | Phase 12 cancelled |
