@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import type { RequestEdit, DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getAllRequestEdits, getRequestEditDetail, approveRequestEdit, rejectRequestEdit } from "./actions";
 import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
@@ -42,6 +43,8 @@ export default function OwnerRequestEditClient({
   const [closing, setClosing] = useState<DailyClosing | null>(null);
   const [openSupplierId, setOpenSupplierId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReasonInput, setRejectReasonInput] = useState("");
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -103,6 +106,8 @@ export default function OwnerRequestEditClient({
     setSelectedId(null);
     setSelected(null);
     setClosing(null);
+    setRejectOpen(false);
+    setRejectReasonInput("");
     const url = new URL(window.location.href);
     url.searchParams.delete("edit");
     window.history.replaceState({}, "", url.toString());
@@ -126,18 +131,30 @@ export default function OwnerRequestEditClient({
   }, [selected]);
 
   const handleAction = async (r: RequestEdit, status: "approved" | "rejected") => {
+    if (status === "rejected") {
+      setRejectOpen(true);
+      return;
+    }
     try {
-      if (status === "approved") {
-        await approveRequestEdit(r.id);
-      } else {
-        const reason = prompt("Alasan penolakan:");
-        if (!reason) return;
-        await rejectRequestEdit(r.id, reason);
-      }
+      await approveRequestEdit(r.id);
+      toast.success("Request edit disetujui.");
       await refresh();
       closeDetail();
     } catch (err: any) {
-      alert(err.message || "Gagal memproses request edit.");
+      toast.error(err.message || "Gagal memproses request edit.");
+      console.error(err);
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!selected || !rejectReasonInput.trim()) return;
+    try {
+      await rejectRequestEdit(selected.id, rejectReasonInput.trim());
+      toast.success("Request edit ditolak.");
+      await refresh();
+      closeDetail();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memproses request edit.");
       console.error(err);
     }
   };
@@ -368,6 +385,47 @@ export default function OwnerRequestEditClient({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Reject Reason */}
+      {rejectOpen && selected && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setRejectOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Tolak request edit"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl border border-notch-border bg-paper-light p-6 shadow-xl"
+          >
+            <h3 className="text-base font-bold text-ink mb-2">Tolak Request Edit</h3>
+            <p className="text-sm text-ink-light mb-4">Berikan alasan penolakan.</p>
+            <textarea
+              value={rejectReasonInput}
+              onChange={(e) => setRejectReasonInput(e.target.value)}
+              rows={3}
+              placeholder="Contoh: Data tidak sesuai dengan kertas supplier..."
+              className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker transition-colors mb-4"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRejectOpen(false)}
+                className="flex-1 rounded-xl border border-notch-border px-4 py-2.5 text-sm font-bold text-ink-light hover:bg-paper transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmReject}
+                disabled={!rejectReasonInput.trim()}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700 transition-colors disabled:opacity-40"
+              >
+                Tolak
+              </button>
+            </div>
           </div>
         </div>
       )}

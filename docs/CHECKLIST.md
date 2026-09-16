@@ -258,12 +258,18 @@
 
 | Ticket | Deskripsi | Status |
 |--------|-----------|--------|
-| 16a | Nav badges — notification count closing pending + selisih open di sidebar owner | [ ] |
-| 16b | Loading skeletons — semua halaman utama | [ ] |
-| 16c | Toast notifications — success/error feedback | [ ] |
-| 16d | Error boundaries — global + UI konsisten | [ ] |
+| 16a | Nav badges — notification count closing pending + selisih open di sidebar owner | [x] |
+| 16b | Loading skeletons — semua halaman utama | [x] |
+| 16c | Toast notifications — success/error feedback | [x] |
+| 16d | Error boundaries — global + UI konsisten | [x] |
 | 16e | Cloudflare setup — deploy ke Cloudflare Pages | [ ] |
 | 16f | Custom domain — `dashboard.awfood.id` + SSL | [ ] |
+
+**Catatan:**
+- **16a:** Badge count query Supabase langsung (`app/owner/actions.ts`). Dummy/localStorage di sidebar owner dihapus sepenuhnya.
+- **16b:** Skeleton pattern: `components/ui/skeleton.tsx` (reusable). `loading.tsx` di `app/owner`, `app/employee`, `app/owner/dashboard`, `app/login`. Suspense fallback teks manual dihapus.
+- **16c:** Library `sonner` (v2.0.8). `components/ui/sonner-toaster.tsx` (client component, bottom-center, richColors, closeButton). `components/ui/confirm-dialog.tsx` (state-driven modal). Semua `window.alert()` dan `window.confirm()` dihapus dari codebase. `prompt()` di OwnerRequestEditClient diganti modal custom.
+- **16d:** `app/error.tsx` (shared boundary semua route owner & employee). `app/global-error.tsx` (wajib `<html><body>`). Tombol reset + link Dashboard.
 
 ---
 
@@ -287,10 +293,10 @@
 | 13 | [~] Cancelled | 0/4 | First release |
 | 14 | ✅ Clear | 4/4 | |
 | 15 | ✅ Clear | 4/5 | Ledger OFF |
-| 16 | ⏳ Pending | 0/6 | Next priority |
+| 16 | ⏳ Pending | 4/6 | Cloudflare deploy next |
 
-**Total:** 66/86 sub-ticket selesai (76.7%)  
-**First release scope:** 66/66 (100.0%)
+**Total:** 70/86 sub-ticket selesai (81.4%)  
+**First release scope:** 70/70 (100.0%)
 
 ---
 
@@ -361,3 +367,9 @@
 - **Schema:** `docs/agents/db_schema.sql`
 - **Migration:** `docs/agents/migrations/001_add_closing_status.sql`
 - **Feature flags:** `lib/feature-flags.ts`
+- **Skeleton:** `components/ui/skeleton.tsx`
+- **ConfirmDialog:** `components/ui/confirm-dialog.tsx`
+- **Toaster:** `components/ui/sonner-toaster.tsx`
+- **Nav badges:** `app/owner/actions.ts`
+- **Error boundaries:** `app/error.tsx`, `app/global-error.tsx`
+- **Loading skeletons:** `app/owner/loading.tsx`, `app/employee/loading.tsx`, `app/owner/dashboard/loading.tsx`, `app/login/loading.tsx`

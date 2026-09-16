@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth, useRequireRole } from "@/lib/auth";
-import { useSyncStorage } from "@/lib/dummy/sync";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getPendingRequestEdits, getPendingClaims, getClosings } from "@/lib/dummy/api";
 import { isEnabled } from "@/lib/feature-flags";
 import type { FeatureFlag } from "@/lib/feature-flags";
+import { getNavBadgeCounts } from "./actions";
 
 type NavItem = { href: string; label: string; flag?: FeatureFlag };
 
@@ -31,19 +30,15 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [version, setVersion] = useState(0);
-  useSyncStorage(() => setVersion((v) => v + 1));
+  const [counts, setCounts] = useState({ pendingCount: 0, openDiscrepancyCount: 0 });
 
-  const pendingEdits = useMemo(() => getPendingRequestEdits().length, [version]);
-  const pendingClaims = useMemo(() => getPendingClaims().length, [version]);
-  const openDiscrepancies = useMemo(() => getClosings().filter((c) => c.discrepancy_status === "open").length, [version]);
-  const pendingVerify = useMemo(() => getClosings().filter((c) => c.status === "submitted").length, [version]);
+  useEffect(() => {
+    getNavBadgeCounts().then(setCounts).catch(() => {});
+  }, [pathname]);
 
   function badgeCount(label: string) {
-    if (label === "Req. Edit") return pendingEdits;
-    if (label === "Klaim") return pendingClaims;
-    if (label === "Selisih") return openDiscrepancies;
-    if (label === "Verifikasi") return pendingVerify;
+    if (label === "Selisih") return counts.openDiscrepancyCount;
+    if (label === "Verifikasi") return counts.pendingCount;
     return 0;
   }
 

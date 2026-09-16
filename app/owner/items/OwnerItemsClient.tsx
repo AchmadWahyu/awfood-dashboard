@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { createItem, updateItem, toggleItemActive, deleteItem, getItems, getBeverageItems } from "./actions";
 import type { Item, ItemType } from "./actions";
 import { formatNumber } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function OwnerItemsClient({ 
   initialItems, 
@@ -26,6 +28,8 @@ export default function OwnerItemsClient({
     selling_price: "" 
   });
   const [editId, setEditId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const refresh = async () => {
     const data = await getItems();
@@ -40,9 +44,14 @@ export default function OwnerItemsClient({
     fd.append("category", form.type);
     fd.append("cost_price", form.cost_price);
     fd.append("selling_price", form.selling_price);
-    await createItem(fd);
-    setForm({ name: "", supplier_id: "", type: "KONSINYASI_KUE", cost_price: "", selling_price: "" });
-    await refresh();
+    try {
+      await createItem(fd);
+      toast.success("Item berhasil ditambahkan.");
+      setForm({ name: "", supplier_id: "", type: "KONSINYASI_KUE", cost_price: "", selling_price: "" });
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambah item.");
+    }
   };
 
   const handleEdit = (i: Item) => {
@@ -66,21 +75,44 @@ export default function OwnerItemsClient({
     fd.append("cost_price", form.cost_price);
     fd.append("selling_price", form.selling_price);
     fd.append("is_active", "true");
-    await updateItem(editId, fd);
-    setEditId(null);
-    setForm({ name: "", supplier_id: "", type: "KONSINYASI_KUE", cost_price: "", selling_price: "" });
-    await refresh();
+    try {
+      await updateItem(editId, fd);
+      toast.success("Item berhasil diperbarui.");
+      setEditId(null);
+      setForm({ name: "", supplier_id: "", type: "KONSINYASI_KUE", cost_price: "", selling_price: "" });
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memperbarui item.");
+    }
   };
 
   const handleToggle = async (id: string, is_active: boolean) => {
-    await toggleItemActive(id, !is_active);
-    await refresh();
+    try {
+      await toggleItemActive(id, !is_active);
+      toast.success("Status item diperbarui.");
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memperbarui status item.");
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Hapus item ini?")) return;
-    await deleteItem(id);
-    await refresh();
+    setConfirmId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmId) return;
+    setConfirmOpen(false);
+    try {
+      await deleteItem(confirmId);
+      toast.success("Item berhasil dihapus.");
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menghapus item.");
+    } finally {
+      setConfirmId(null);
+    }
   };
 
   return (
@@ -146,6 +178,17 @@ export default function OwnerItemsClient({
           );
         })}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Hapus Item"
+        description="Yakin ingin menghapus item ini? Aksi ini tidak bisa dibatalkan."
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => { setConfirmOpen(false); setConfirmId(null); }}
+      />
     </div>
   );
 }

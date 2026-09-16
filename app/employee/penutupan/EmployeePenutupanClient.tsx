@@ -5,6 +5,7 @@ import { submitClosing } from "./actions";
 import type { Supplier, Item, ClosingItem, ClosingRecord, ClosingSummaryItem } from "./actions";
 import { todayJakarta } from "@/lib/utils/date";
 import { formatRp, formatDateTime } from "@/lib/utils/format";
+import { toast } from "sonner";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 function NotebookInput({ value, onChange, readOnly }: { value: number; onChange: (v: number) => void; readOnly?: boolean }) {
@@ -204,10 +205,13 @@ export default function EmployeePenutupanClient({
 
     try {
       const result = await submitClosing(formData);
+      toast.success("Closing berhasil disimpan.");
       setSubmittedAt(new Date().toISOString());
       localStorage.removeItem(LS_KEY);
     } catch (err: any) {
-      setError(err.message || "Gagal menyimpan closing. Coba lagi.");
+      const msg = err.message || "Gagal menyimpan closing. Coba lagi.";
+      setError(msg);
+      toast.error(msg);
       console.error(err);
     } finally {
       setIsSubmitting(false);

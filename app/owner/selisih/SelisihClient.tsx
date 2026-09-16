@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getClosingsWithDiscrepancy, getClosingDetail, resolveDiscrepancy, addDeduction } from "./actions";
 import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
@@ -174,12 +175,13 @@ export default function SelisihClient({
         });
       }
 
+      toast.success("Selisih berhasil diselesaikan.");
       setResolveId(null);
       setNote("");
       await refresh();
       closeDetail();
     } catch (err: any) {
-      alert(err.message || "Gagal menyelesaikan investigasi.");
+      toast.error(err.message || "Gagal menyelesaikan investigasi.");
       console.error(err);
     } finally {
       setIsSubmitting(false);

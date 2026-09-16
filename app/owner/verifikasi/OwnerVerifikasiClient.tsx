@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { DailyClosing, Item, Supplier, Expense } from "@/lib/dummy/types";
 import { getSubmittedClosings, getClosingDetail, verifyClosing, rejectClosing } from "./actions";
 import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
@@ -157,10 +158,11 @@ export default function OwnerVerifikasiClient({
         cashInitial: previewCalculation.cashInitial,
         qrisVerified: previewCalculation.qris,
       });
+      toast.success("Closing berhasil diverifikasi.");
       await refresh();
       closeDetail();
     } catch (err: any) {
-      alert(err.message || "Gagal verifikasi closing.");
+      toast.error(err.message || "Gagal verifikasi closing.");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -175,10 +177,11 @@ export default function OwnerVerifikasiClient({
         closingId: selected.id,
         reason: rejectReason.trim(),
       });
+      toast.success("Closing berhasil ditolak.");
       await refresh();
       closeDetail();
     } catch (err: any) {
-      alert(err.message || "Gagal menolak closing.");
+      toast.error(err.message || "Gagal menolak closing.");
       console.error(err);
     } finally {
       setIsSubmitting(false);

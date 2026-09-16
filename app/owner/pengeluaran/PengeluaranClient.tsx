@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
+import { toast } from "sonner";
 import { addExpense, deleteExpense } from "./actions";
 import type { Expense, ExpenseCategory, Pocket } from "@/lib/dummy/types";
 import { formatRp, formatDateDisplay } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "BAHAN_MINUMAN", label: "Bahan Minuman" },
@@ -39,6 +41,8 @@ export default function PengeluaranClient({
   });
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,24 +67,32 @@ export default function PengeluaranClient({
           expense_date: todayLocal(),
           note: "",
         });
-        // Refresh list by reloading page (server action revalidated)
+        toast.success("Pengeluaran berhasil dicatat.");
         window.location.reload();
       } catch (err: any) {
-        alert(err.message || "Gagal menambah pengeluaran.");
+        toast.error(err.message || "Gagal menambah pengeluaran.");
       }
     });
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Hapus pengeluaran ini?")) return;
-    setDeletingId(id);
+    setConfirmId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmId) return;
+    setDeletingId(confirmId);
+    setConfirmOpen(false);
     try {
-      await deleteExpense(id);
+      await deleteExpense(confirmId);
+      toast.success("Pengeluaran berhasil dihapus.");
       window.location.reload();
     } catch (err: any) {
-      alert(err.message || "Gagal menghapus pengeluaran.");
+      toast.error(err.message || "Gagal menghapus pengeluaran.");
     } finally {
       setDeletingId(null);
+      setConfirmId(null);
     }
   };
 
@@ -227,6 +239,17 @@ export default function PengeluaranClient({
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Hapus Pengeluaran"
+        description="Yakin ingin menghapus pengeluaran ini? Aksi ini tidak bisa dibatalkan."
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => { setConfirmOpen(false); setConfirmId(null); }}
+      />
     </div>
   );
 }

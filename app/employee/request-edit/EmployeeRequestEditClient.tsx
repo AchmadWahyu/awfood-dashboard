@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 import type { DailyClosing, Item, Supplier, ClosingItem, RequestEdit } from "@/lib/dummy/types";
 import { getRequestEditsByStaff, getClosingDetailForRequestEdit, createRequestEdit } from "./actions";
 import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
@@ -178,6 +179,7 @@ export default function EmployeeRequestEditClient({
         reason,
       });
 
+      toast.success("Request edit berhasil diajukan.");
       setOk(true);
       setClosingId("");
       setGroups([]);
@@ -190,7 +192,7 @@ export default function EmployeeRequestEditClient({
       
       setTimeout(() => setOk(false), 3000);
     } catch (err: any) {
-      alert(err.message || "Gagal mengajukan request edit. Coba lagi.");
+      toast.error(err.message || "Gagal mengajukan request edit. Coba lagi.");
       console.error(err);
     } finally {
       setIsSubmitting(false);

@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { createSupplier, updateSupplier, toggleSupplierActive, deleteSupplier, getSuppliers } from "./actions";
 import type { Supplier } from "./actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppliers: Supplier[] }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [form, setForm] = useState({ name: "", phone: "" });
   const [editId, setEditId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const refresh = async () => {
     const data = await getSuppliers();
@@ -20,9 +24,14 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
     const fd = new FormData();
     fd.append("name", form.name);
     fd.append("phone", form.phone || "");
-    await createSupplier(fd);
-    setForm({ name: "", phone: "" });
-    await refresh();
+    try {
+      await createSupplier(fd);
+      toast.success("Supplier berhasil ditambahkan.");
+      setForm({ name: "", phone: "" });
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambah supplier.");
+    }
   };
 
   const handleEdit = (s: Supplier) => {
@@ -37,21 +46,44 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
     fd.append("name", form.name);
     fd.append("phone", form.phone || "");
     fd.append("is_active", "true");
-    await updateSupplier(editId, fd);
-    setEditId(null);
-    setForm({ name: "", phone: "" });
-    await refresh();
+    try {
+      await updateSupplier(editId, fd);
+      toast.success("Supplier berhasil diperbarui.");
+      setEditId(null);
+      setForm({ name: "", phone: "" });
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memperbarui supplier.");
+    }
   };
 
   const handleToggle = async (id: string, is_active: boolean) => {
-    await toggleSupplierActive(id, !is_active);
-    await refresh();
+    try {
+      await toggleSupplierActive(id, !is_active);
+      toast.success("Status supplier diperbarui.");
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memperbarui status supplier.");
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Hapus supplier ini?")) return;
-    await deleteSupplier(id);
-    await refresh();
+    setConfirmId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmId) return;
+    setConfirmOpen(false);
+    try {
+      await deleteSupplier(confirmId);
+      toast.success("Supplier berhasil dihapus.");
+      await refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menghapus supplier.");
+    } finally {
+      setConfirmId(null);
+    }
   };
 
   return (
@@ -87,6 +119,17 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Hapus Supplier"
+        description="Yakin ingin menghapus supplier ini? Aksi ini tidak bisa dibatalkan."
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => { setConfirmOpen(false); setConfirmId(null); }}
+      />
     </div>
   );
 }
