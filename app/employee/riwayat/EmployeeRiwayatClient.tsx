@@ -216,34 +216,40 @@ export default function EmployeeRiwayatClient({
                       </div>
                     </button>
                     {isOpen && (
-                      <div className="border-t border-cream-border">
-                        <div className="overflow-x-auto">
-                          <table className="aw-table min-w-[480px]">
-                            <thead>
-                              <tr>
-                                <th>ITEM</th>
-                                <th className="text-center">AWAL</th>
-                                <th className="text-center">AKHIR</th>
-                                <th className="text-center">TERJUAL</th>
-                                <th className="text-right">TOTAL</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {g.items.map((ci) => (
-                                <tr key={ci.id}>
-                                  <td className="font-medium">{ci.item.name}</td>
-                                  <td className="text-center tabular-nums">{ci.stok_awal}</td>
-                                  <td className="text-center tabular-nums">{ci.stok_akhir}</td>
-                                  <td className="text-center font-bold tabular-nums">{ci.terjual}</td>
-                                  <td className="text-right font-bold text-marker tabular-nums">{formatRp(ci.total_rp)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        <div className="table-footer flex items-center justify-between rounded-b-xl">
-                          <span className="font-semibold">Total {g.supplier?.name || "Minuman Milik Sendiri"}</span>
-                          <span className="font-bold">{formatRp(g.totalOmzet)}</span>
+                      <div className="border-t border-cream-border px-4 py-4 space-y-3">
+                        {g.items.map((ci) => (
+                          <div
+                            key={ci.id}
+                            className="rounded-xl border border-ruled bg-paper-light p-4"
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-3">
+                              <p className="text-sm font-semibold text-ink truncate">
+                                {ci.item.name}
+                              </p>
+                              <span className="text-sm font-bold text-marker tabular-nums shrink-0">
+                                {formatRp(ci.total_rp)}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-light">
+                              <div className="flex flex-col items-center gap-1 flex-2">
+                                <p>Awal</p> <strong className="text-ink tabular-nums">{ci.stok_awal}</strong>
+                              </div>
+                              <div className="flex flex-col items-center gap-1 flex-2">
+                                <p>Akhir</p> <strong className="text-ink tabular-nums">{ci.stok_akhir}</strong>
+                              </div>
+                              <div className="flex flex-col items-center gap-1 flex-1">
+                                <p>Terjual</p> <strong className="text-ink tabular-nums text-notch-success-text">{ci.terjual}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="flex items-center justify-between rounded-xl bg-cream-card px-4 py-3 border border-cream-border">
+                          <span className="font-semibold text-sm">
+                            Total {g.supplier?.name || "Minuman Milik Sendiri"}
+                          </span>
+                          <span className="font-bold text-sm text-marker">
+                            {formatRp(g.totalOmzet)}
+                          </span>
                         </div>
                       </div>
                     )}
