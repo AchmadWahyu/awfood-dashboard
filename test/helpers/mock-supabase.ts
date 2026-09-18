@@ -85,6 +85,11 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
                   reset();
                   return Promise.resolve({ data: result[0] ?? null, error: null });
                 },
+                maybeSingle: () => {
+                  const result = getTableData();
+                  reset();
+                  return Promise.resolve({ data: result[0] ?? null, error: null });
+                },
                 order: (col: string, { ascending = true } = {}) => {
                   currentOrder = { column: col, ascending };
                   return Promise.resolve(buildResult());
@@ -128,7 +133,7 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
                 (data[tableKey] as any[]).push(...newRows);
               }
               reset();
-              return Promise.resolve({ data: newRows, error: null }).then(callback);
+              return Promise.resolve({ data: newRows[0], error: null }).then(callback);
             },
           };
           return chain;

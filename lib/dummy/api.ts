@@ -30,7 +30,7 @@ function add<T extends { id: string }>(key: string, entity: T): T {
 
 function update<T extends { id: string }>(key: string, id: string, patch: Partial<T>): T | null {
   const arr = list<T>(key);
-  const idx = arr.findIndex((x: any) => x.id === id);
+  const idx = arr.findIndex((x) => x.id === id);
   if (idx === -1) return null;
   arr[idx] = { ...arr[idx], ...patch } as T;
   setKey(key, arr);
@@ -39,7 +39,7 @@ function update<T extends { id: string }>(key: string, id: string, patch: Partia
 
 function remove<T extends { id: string }>(key: string, id: string): boolean {
   const arr = list<T>(key);
-  const next = arr.filter((x: any) => x.id !== id);
+  const next = arr.filter((x) => x.id !== id);
   if (next.length === arr.length) return false;
   setKey(key, next);
   return true;

@@ -162,7 +162,7 @@ export default function OwnerDashboardClient({ initialData, initialDate }: Props
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#6b6b6b" }} axisLine={{ stroke: "#e8e4dc" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#6b6b6b" }} axisLine={{ stroke: "#e8e4dc" }} tickFormatter={(v) => `Rp ${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
-                  formatter={((value: number) => [formatRp(value), "Omzet"]) as any}
+                  formatter={(value) => [formatRp(Number(value)), "Omzet"]}
                   contentStyle={{ borderRadius: 12, border: "1px solid #e8e4dc", fontSize: 12 }}
                 />
                 <Line type="monotone" dataKey="omzet" stroke="#A0522D" strokeWidth={2} dot={{ r: 3, fill: "#A0522D" }} activeDot={{ r: 5 }} />

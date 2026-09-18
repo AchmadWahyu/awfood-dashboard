@@ -25,6 +25,46 @@ const NAV: NavItem[] = [
   { href: "/owner/karyawan", label: "Karyawan" },
 ].filter((n) => !n.flag || isEnabled(n.flag));
 
+function NavLinks({
+  pathname,
+  counts,
+  onNavigate,
+}: {
+  pathname: string;
+  counts: { pendingCount: number; openDiscrepancyCount: number };
+  onNavigate: () => void;
+}) {
+  return (
+    <>
+      {NAV.map((n) => {
+        const count = n.label === "Selisih"
+          ? counts.openDiscrepancyCount
+          : n.label === "Verifikasi"
+          ? counts.pendingCount
+          : 0;
+        const active = pathname === n.href;
+        return (
+          <Link
+            key={n.href}
+            href={n.href}
+            onClick={onNavigate}
+            className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              active ? "bg-marker text-white" : "text-ink-light hover:bg-paper"
+            }`}
+          >
+            <span>{n.label}</span>
+            {count > 0 && (
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${active ? "bg-white text-marker" : "bg-marker text-white"}`}>
+                {count}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   useRequireRole("OWNER");
   const { user, logout } = useAuth();
@@ -35,36 +75,6 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     getNavBadgeCounts().then(setCounts).catch(() => {});
   }, [pathname]);
-
-  function badgeCount(label: string) {
-    if (label === "Selisih") return counts.openDiscrepancyCount;
-    if (label === "Verifikasi") return counts.pendingCount;
-    return 0;
-  }
-
-  const NavLinks = () => (
-    <>
-      {NAV.map((n) => {
-        const count = badgeCount(n.label);
-        const active = pathname === n.href;
-        return (
-          <Link
-            key={n.href}
-            href={n.href}
-            onClick={() => setOpen(false)}
-            className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              active ? "bg-marker text-white" : "text-ink-light hover:bg-paper"
-            }`}
-          >
-            <span>{n.label}</span>
-            {count > 0 && (
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${active ? "bg-white text-marker" : "bg-marker text-white"}`}>{count}</span>
-            )}
-          </Link>
-        );
-      })}
-    </>
-  );
 
   return (
     <div className="min-h-[100dvh] flex notebook-bg">
@@ -98,7 +108,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
         </div>
         <div className="lg:hidden h-[57px]" /> {/* spacer for mobile header */}
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-          <NavLinks />
+          <NavLinks pathname={pathname} counts={counts} onNavigate={() => setOpen(false)} />
         </nav>
         <div className="px-4 py-3 border-t border-notch-border hidden lg:block">
           <div className="flex items-center justify-between">
