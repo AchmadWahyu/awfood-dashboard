@@ -74,11 +74,14 @@ async function getExpensesByDate(date: string): Promise<Expense[]> {
 
 export async function getClosingDetail(closingId: string) {
   const supabase = await createClient();
-  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
   const { data: closing, error } = await supabase
     .from("daily_closings")
     .select("*")
     .eq("id", closingId)
+    .eq("staff_id", user.id)
     .single();
 
   if (error || !closing) return null;
