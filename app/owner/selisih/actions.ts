@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { DailyClosing, Item, Supplier, Expense } from "@/lib/dummy/types";
-import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
+import type { DailyClosing, Expense } from "@/lib/dummy/types";
+import { getItems } from "@/app/employee/riwayat/actions";
 
 export async function getClosingsWithDiscrepancy(): Promise<DailyClosing[]> {
   const supabase = await createClient();
@@ -14,6 +14,7 @@ export async function getClosingsWithDiscrepancy(): Promise<DailyClosing[]> {
       *,
       staff:staff_id(full_name)
     `)
+    .eq("status", "verified")
     .neq("cash_discrepancy", 0)
     .order("closing_date", { ascending: false });
 
@@ -100,9 +101,8 @@ export async function getClosingDetail(closingId: string): Promise<DailyClosing 
     console.error("Error fetching closing items:", itemsError);
   }
 
-  const [items, suppliers, expenses] = await Promise.all([
+  const [items, expenses] = await Promise.all([
     getItems(),
-    getSuppliers(),
     getExpensesByDate(closing.closing_date),
   ]);
 

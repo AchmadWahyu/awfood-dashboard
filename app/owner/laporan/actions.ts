@@ -8,6 +8,7 @@ export async function getSalesReport(startDate: string, endDate: string): Promis
   const { data, error } = await supabase
     .from("daily_closings")
     .select("*, staff:staff_id(full_name)")
+    .eq("status", "verified")
     .gte("closing_date", startDate)
     .lte("closing_date", endDate)
     .order("closing_date", { ascending: false });
