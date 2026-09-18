@@ -29,9 +29,10 @@ function formatTrendDate(dateStr: string): string {
   return dateStr.slice(5);
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(date?: string): Promise<DashboardData> {
   const supabase = await createClient();
   const today = todayJakarta();
+  const targetDate = date || today;
 
   // Pending count
   const { count: pendingCount } = await supabase
@@ -49,17 +50,17 @@ export async function getDashboardData(): Promise<DashboardData> {
     (d) => Math.abs(Number(d.cash_discrepancy) || 0) > 5000
   ).length;
 
-  // Today's closing
-  const { data: todayClosings } = await supabase
+  // Selected date closing
+  const { data: dateClosings } = await supabase
     .from("daily_closings")
     .select("total_system_omzet, cash_physical, qris_physical, cash_discrepancy, status")
-    .eq("closing_date", today);
+    .eq("closing_date", targetDate);
 
-  const todayVerified = todayClosings?.find((c) => c.status === "verified");
-  const todayOmzet = Number(todayVerified?.total_system_omzet) || 0;
-  const todayCash = Number(todayVerified?.cash_physical) || 0;
-  const todayQris = Number(todayVerified?.qris_physical) || 0;
-  const todayDiscrepancyCount = todayVerified && Math.abs(Number(todayVerified.cash_discrepancy) || 0) > 5000 ? 1 : 0;
+  const dateVerified = dateClosings?.find((c) => c.status === "verified");
+  const todayOmzet = Number(dateVerified?.total_system_omzet) || 0;
+  const todayCash = Number(dateVerified?.cash_physical) || 0;
+  const todayQris = Number(dateVerified?.qris_physical) || 0;
+  const todayDiscrepancyCount = dateVerified && Math.abs(Number(dateVerified.cash_discrepancy) || 0) > 5000 ? 1 : 0;
 
   // Trend 7 days
   const start7 = addDays(today, -6);

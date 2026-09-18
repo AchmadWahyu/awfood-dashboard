@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { formatRp } from "@/lib/utils/format";
+import { todayJakarta } from "@/lib/utils/date";
 import Link from "next/link";
 import type { DashboardData } from "./actions";
+import { getDashboardData } from "./actions";
 
 interface Props {
   initialData: DashboardData;
+  initialDate?: string;
 }
 
 function computeTrendLine(data: { date: string; omzet: number }[]) {
@@ -34,17 +37,50 @@ function computeTrendLine(data: { date: string; omzet: number }[]) {
   }));
 }
 
-export default function OwnerDashboardClient({ initialData }: Props) {
+function formatDateLabel(dateStr: string): string {
+  const today = todayJakarta();
+  if (dateStr === today) return "Hari Ini";
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+export default function OwnerDashboardClient({ initialData, initialDate }: Props) {
+  const [data, setData] = useState<DashboardData>(initialData);
+  const [selectedDate, setSelectedDate] = useState<string>(initialDate || todayJakarta());
+  const [isPending, startTransition] = useTransition();
   const [trendRange, setTrendRange] = useState<7 | 30>(7);
-  const data = initialData;
+
   const rawTrend = trendRange === 7 ? data.trend7 : data.trend30;
   const trend = computeTrendLine(rawTrend);
+  const dateLabel = formatDateLabel(selectedDate);
+
+  async function handleDateChange(date: string) {
+    setSelectedDate(date);
+    startTransition(async () => {
+      const newData = await getDashboardData(date);
+      setData(newData);
+    });
+  }
 
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Dashboard Overview</h2>
 
-      {/* Alerts */}
+      {/* Date Picker */}
+      <div className="rounded-2xl border border-notch-border bg-paper-light p-4 shadow-sm">
+        <label className="block text-xs text-ink-light mb-1.5">Pilih Tanggal</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => handleDateChange(e.target.value)}
+            max={todayJakarta()}
+            className="rounded-xl border border-notch-border bg-paper-light px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-marker/30"
+          />
+        </div>
+      </div>
+
+      {/* Alerts — always visible */}
       {(data.pendingCount > 0 || data.openDiscrepancyCount > 0) && (
         <div className="rounded-2xl border border-marker/30 bg-marker-light/40 p-4 space-y-2">
           <h3 className="text-sm font-bold text-marker">⚠️ Pending Action</h3>
@@ -63,21 +99,32 @@ export default function OwnerDashboardClient({ initialData }: Props) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
-          <p className="text-xs text-ink-light">Omzet Hari Ini</p>
-          <p className="text-2xl font-bold text-marker">{formatRp(data.todayOmzet)}</p>
-          <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi hari ini</p>
-        </div>
-        <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
-          <p className="text-xs text-ink-light">Kas Fisik Hari Ini</p>
-          <p className="text-2xl font-bold text-ink">{formatRp(data.todayCash)}</p>
-          <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi hari ini</p>
-        </div>
-        <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
-          <p className="text-xs text-ink-light">QRIS Hari Ini</p>
-          <p className="text-2xl font-bold text-ink">{formatRp(data.todayQris)}</p>
-          <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi hari ini</p>
-        </div>
+        {isPending ? (
+          <>
+            <KpiSkeleton />
+            <KpiSkeleton />
+            <KpiSkeleton />
+          </>
+        ) : (
+          <>
+            <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
+              <p className="text-xs text-ink-light">Omzet {dateLabel}</p>
+              <p className="text-2xl font-bold text-marker">{formatRp(data.todayOmzet)}</p>
+              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+            </div>
+            <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
+              <p className="text-xs text-ink-light">Kas Fisik {dateLabel}</p>
+              <p className="text-2xl font-bold text-ink">{formatRp(data.todayCash)}</p>
+              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+            </div>
+            <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
+              <p className="text-xs text-ink-light">QRIS {dateLabel}</p>
+              <p className="text-2xl font-bold text-ink">{formatRp(data.todayQris)}</p>
+              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+            </div>
+          </>
+        )}
+        {/* Selisih — always visible */}
         <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
           <p className="text-xs text-ink-light">Selisih Terbuka</p>
           <p className="text-2xl font-bold text-marker">{data.openDiscrepancyCount}</p>
@@ -85,6 +132,7 @@ export default function OwnerDashboardClient({ initialData }: Props) {
         </div>
       </div>
 
+      {/* Trend & Top 5 — always visible */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Trend Chart */}
         <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
@@ -147,6 +195,16 @@ export default function OwnerDashboardClient({ initialData }: Props) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function KpiSkeleton() {
+  return (
+    <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 animate-pulse">
+      <div className="h-3 w-24 bg-ruled rounded" />
+      <div className="h-8 w-32 bg-ruled rounded" />
+      <div className="h-2.5 w-40 bg-ruled rounded" />
     </div>
   );
 }

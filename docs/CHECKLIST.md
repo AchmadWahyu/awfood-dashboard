@@ -328,6 +328,12 @@
 | `/owner/request-edit` | Phase 11 cancelled |
 | `/employee/request-edit` | Phase 11 cancelled |
 
+**Catatan penting `/owner/karyawan`:**
+- Halaman **Manage Karyawan** (`app/owner/karyawan/page.tsx`) CRUD-nya menyimpan data ke `localStorage` (`lib/dummy/api.ts`), **bukan ke Supabase Auth**.
+- Staff yang ditambah/edit/hapus lewat halaman ini **tidak bisa login** via `/login/pin` karena login staff meng-query tabel `profiles` + `auth.users` di Supabase (RPC `get_staff_auth`, verifikasi `pin_hash` bcrypt, sign-in pakai `auth_token`).
+- Agar CRUD staff benar-benar fungsional, perlu server actions yang: (1) membuat `auth.users` via Supabase Admin API, (2) mengatur `profiles.pin_hash` (bcrypt) dan `profiles.auth_token`, (3) menghapus auth user saat staff dihapus.
+- Saat ini hanya UI mock/MVP. Data karyawan seed (`lib/dummy/seed.ts`) juga tidak sinkron dengan akun Supabase Auth.
+
 ---
 
 ## Keputusan Penting (dari memory)

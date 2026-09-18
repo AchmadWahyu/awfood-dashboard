@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { toast } from "sonner";
-import { addExpense, deleteExpense } from "./actions";
+import { addExpense, deleteExpense, getExpenses } from "./actions";
 import type { Expense, ExpenseCategory, Pocket } from "@/lib/dummy/types";
 import { formatRp, formatDateDisplay } from "@/lib/utils/format";
+import { todayJakarta } from "@/lib/utils/date";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
@@ -25,12 +26,19 @@ function todayLocal() {
   return local.toISOString().split("T")[0];
 }
 
+interface Props {
+  initialExpenses: Expense[];
+  initialDate: string;
+}
+
 export default function PengeluaranClient({
   initialExpenses,
-}: {
-  initialExpenses: Expense[];
-}) {
+  initialDate,
+}: Props) {
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
+  const [selectedDate, setSelectedDate] = useState<string>(initialDate);
+  const [isPending, startTransition] = useTransition();
+
   const [form, setForm] = useState({
     category: "BAHAN_MINUMAN" as ExpenseCategory,
     custom_label: "",
@@ -39,10 +47,23 @@ export default function PengeluaranClient({
     expense_date: todayLocal(),
     note: "",
   });
-  const [isPending, startTransition] = useTransition();
+
+  const [formPending, startFormTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  const refresh = async (date: string) => {
+    const data = await getExpenses(date);
+    setExpenses(data);
+  };
+
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+    startTransition(async () => {
+      await refresh(date);
+    });
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +77,7 @@ export default function PengeluaranClient({
       fd.append("custom_label", form.custom_label);
     }
 
-    startTransition(async () => {
+    startFormTransition(async () => {
       try {
         await addExpense(fd);
         setForm({
@@ -68,7 +89,7 @@ export default function PengeluaranClient({
           note: "",
         });
         toast.success("Pengeluaran berhasil dicatat.");
-        window.location.reload();
+        await refresh(selectedDate);
       } catch (err: any) {
         toast.error(err.message || "Gagal menambah pengeluaran.");
       }
@@ -87,7 +108,7 @@ export default function PengeluaranClient({
     try {
       await deleteExpense(confirmId);
       toast.success("Pengeluaran berhasil dihapus.");
-      window.location.reload();
+      await refresh(selectedDate);
     } catch (err: any) {
       toast.error(err.message || "Gagal menghapus pengeluaran.");
     } finally {
@@ -96,16 +117,35 @@ export default function PengeluaranClient({
     }
   };
 
-  const totalCash = expenses
-    .filter((e) => e.pocket === "CASH_LACI")
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalQris = expenses
-    .filter((e) => e.pocket === "QRIS_AWFOOD")
-    .reduce((sum, e) => sum + e.amount, 0);
+  const totalCash = useMemo(
+    () => expenses.filter((e) => e.pocket === "CASH_LACI").reduce((sum, e) => sum + e.amount, 0),
+    [expenses]
+  );
+  const totalQris = useMemo(
+    () => expenses.filter((e) => e.pocket === "QRIS_AWFOOD").reduce((sum, e) => sum + e.amount, 0),
+    [expenses]
+  );
+
+  const dateLabel = selectedDate === todayJakarta() ? "Hari Ini" : formatDateDisplay(selectedDate);
 
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Pencatatan Pengeluaran</h2>
+
+      {/* Date Filter */}
+      <div className="rounded-2xl border border-notch-border bg-paper-light p-4 shadow-sm">
+        <label className="block text-xs text-ink-light mb-1.5">Lihat Pengeluaran Tanggal</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => handleDateChange(e.target.value)}
+            className="rounded-xl border border-notch-border bg-paper-light px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-marker/30"
+          />
+          {isPending && <span className="text-xs text-ink-light">Memuat...</span>}
+        </div>
+      </div>
+
       <form
         onSubmit={handleAdd}
         className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-lg"
@@ -189,56 +229,88 @@ export default function PengeluaranClient({
         </div>
         <button
           type="submit"
-          disabled={isPending}
+          disabled={formPending}
           className="rounded-xl bg-marker px-4 py-2 text-xs font-bold text-white hover:bg-marker-hover transition-colors disabled:opacity-40"
         >
-          {isPending ? "Memproses..." : "Catat Pengeluaran"}
+          {formPending ? "Memproses..." : "Catat Pengeluaran"}
         </button>
       </form>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-notch-border bg-paper-light p-4">
-          <p className="text-xs text-ink-light">Total Pengeluaran Cash</p>
-          <p className="text-xl font-bold text-ink">{formatRp(totalCash)}</p>
-        </div>
-        <div className="rounded-2xl border border-notch-border bg-paper-light p-4">
-          <p className="text-xs text-ink-light">Total Pengeluaran QRIS</p>
-          <p className="text-xl font-bold text-ink">{formatRp(totalQris)}</p>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        {expenses.map((e) => (
-          <div
-            key={e.id}
-            className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4"
-          >
-            <div>
-              <p className="text-sm font-bold text-ink">
-                {e.category === "LAINNYA"
-                  ? e.custom_label || "Lainnya"
-                  : CATEGORIES.find((c) => c.value === e.category)?.label}
-              </p>
-              <p className="text-xs text-ink-light">
-                {formatDateDisplay(e.date)} · {e.pocket === "CASH_LACI" ? "Cash Laci" : "QRIS"}{" "}
-                {e.note && `· ${e.note}`}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-marker">
-                {formatRp(e.amount)}
-              </span>
-              <button
-                onClick={() => handleDelete(e.id)}
-                disabled={deletingId === e.id}
-                className="text-xs text-red-500 hover:text-red-700 transition-colors disabled:opacity-40"
-              >
-                {deletingId === e.id ? "..." : "Hapus"}
-              </button>
-            </div>
+      {isPending ? (
+        <div className="grid grid-cols-2 gap-4 animate-pulse">
+          <div className="rounded-2xl border border-notch-border bg-paper-light p-4 space-y-2">
+            <div className="h-3 w-28 bg-ruled rounded" />
+            <div className="h-7 w-32 bg-ruled rounded" />
           </div>
-        ))}
-      </div>
+          <div className="rounded-2xl border border-notch-border bg-paper-light p-4 space-y-2">
+            <div className="h-3 w-28 bg-ruled rounded" />
+            <div className="h-7 w-32 bg-ruled rounded" />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-2xl border border-notch-border bg-paper-light p-4">
+            <p className="text-xs text-ink-light">Total Pengeluaran Cash {dateLabel}</p>
+            <p className="text-xl font-bold text-ink">{formatRp(totalCash)}</p>
+          </div>
+          <div className="rounded-2xl border border-notch-border bg-paper-light p-4">
+            <p className="text-xs text-ink-light">Total Pengeluaran QRIS {dateLabel}</p>
+            <p className="text-xl font-bold text-ink">{formatRp(totalQris)}</p>
+          </div>
+        </div>
+      )}
+
+      {isPending ? (
+        <div className="space-y-2 animate-pulse">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4">
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-ruled rounded" />
+                <div className="h-3 w-48 bg-ruled rounded" />
+              </div>
+              <div className="h-4 w-20 bg-ruled rounded" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {expenses.length === 0 && (
+            <p className="text-sm text-ink-light text-center py-8">
+              Tidak ada pengeluaran pada {dateLabel.toLowerCase()}.
+            </p>
+          )}
+          {expenses.map((e) => (
+            <div
+              key={e.id}
+              className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4"
+            >
+              <div>
+                <p className="text-sm font-bold text-ink">
+                  {e.category === "LAINNYA"
+                    ? e.custom_label || "Lainnya"
+                    : CATEGORIES.find((c) => c.value === e.category)?.label}
+                </p>
+                <p className="text-xs text-ink-light">
+                  {formatDateDisplay(e.date)} · {e.pocket === "CASH_LACI" ? "Cash Laci" : "QRIS"}{" "}
+                  {e.note && `· ${e.note}`}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-bold text-marker">
+                  {formatRp(e.amount)}
+                </span>
+                <button
+                  onClick={() => handleDelete(e.id)}
+                  disabled={deletingId === e.id}
+                  className="text-xs text-red-500 hover:text-red-700 transition-colors disabled:opacity-40"
+                >
+                  {deletingId === e.id ? "..." : "Hapus"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}
