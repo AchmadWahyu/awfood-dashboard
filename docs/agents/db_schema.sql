@@ -268,7 +268,11 @@ CREATE TABLE IF NOT EXISTS public.audit_request_edits (
     target_table TEXT NOT NULL,
     target_id UUID NOT NULL,
     reason TEXT NOT NULL,
+    changes JSONB NOT NULL DEFAULT '{}'::jsonb,
     status TEXT DEFAULT 'PENDING' NOT NULL CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    approved_by UUID REFERENCES public.profiles(id),
+    approved_at TIMESTAMPTZ,
+    notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
