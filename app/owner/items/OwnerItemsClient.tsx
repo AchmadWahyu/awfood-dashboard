@@ -1,12 +1,30 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { createItem, updateItem, toggleItemActive, deleteItem, getItems, getBeverageItems } from "./actions";
 import type { Item, ItemType } from "./actions";
 import { formatNumber } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+
+function SearchIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
 
 export default function OwnerItemsClient({
   initialItems,
@@ -20,6 +38,20 @@ export default function OwnerItemsClient({
   const [items, setItems] = useState<Item[]>(initialItems);
   const [suppliers] = useState(initialSuppliers);
   const [beverages] = useState(initialBeverages);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filteredItems = useMemo(() => {
+    if (!debouncedQuery.trim()) return items;
+    const q = debouncedQuery.toLowerCase();
+    return items.filter((i) => i.name.toLowerCase().includes(q));
+  }, [items, debouncedQuery]);
 
   // Add form (inline)
   const [addForm, setAddForm] = useState({
@@ -147,6 +179,29 @@ export default function OwnerItemsClient({
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Items</h2>
 
+      {/* Search */}
+      <div className="relative">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-light/60">
+          <SearchIcon />
+        </span>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari item..."
+          className="w-full rounded-xl border-2 border-ruled bg-paper-light py-2.5 pl-10 pr-10 text-sm text-ink outline-none placeholder:text-ink-light/50 focus:border-marker transition-colors"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink transition-colors"
+            aria-label="Hapus pencarian"
+          >
+            <XIcon />
+          </button>
+        )}
+      </div>
+
       {/* Add Form — inline */}
       <form onSubmit={handleAdd} className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-lg">
         <div className="grid grid-cols-2 gap-3">
@@ -187,7 +242,10 @@ export default function OwnerItemsClient({
 
       {/* List */}
       <div className="space-y-2">
-        {items.map((i) => {
+        {filteredItems.length === 0 ? (
+          <p className="text-sm text-ink-light py-6 text-center">Tidak ada item yang cocok.</p>
+        ) : (
+          filteredItems.map((i) => {
           const sup = suppliers.find((s) => s.id === i.supplier_id);
           return (
             <div key={i.id} className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4">
@@ -206,7 +264,8 @@ export default function OwnerItemsClient({
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Edit Bottomsheet / Modal */}

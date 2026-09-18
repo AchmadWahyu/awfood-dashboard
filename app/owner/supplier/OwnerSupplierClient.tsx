@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { createSupplier, updateSupplier, toggleSupplierActive, deleteSupplier, getSuppliers } from "./actions";
 import type { Supplier } from "./actions";
@@ -9,8 +9,40 @@ import type { Item } from "../items/actions";
 import { formatRp } from "@/lib/utils/format";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
+function SearchIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppliers: Supplier[] }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filteredSuppliers = useMemo(() => {
+    if (!debouncedQuery.trim()) return suppliers;
+    const q = debouncedQuery.toLowerCase();
+    return suppliers.filter((s) => s.name.toLowerCase().includes(q));
+  }, [suppliers, debouncedQuery]);
 
   // Add form (inline)
   const [addForm, setAddForm] = useState({ name: "", phone: "" });
@@ -145,6 +177,29 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Supplier</h2>
 
+      {/* Search */}
+      <div className="relative">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-light/60">
+          <SearchIcon />
+        </span>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari supplier..."
+          className="w-full rounded-xl border-2 border-ruled bg-paper-light py-2.5 pl-10 pr-10 text-sm text-ink outline-none placeholder:text-ink-light/50 focus:border-marker transition-colors"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink transition-colors"
+            aria-label="Hapus pencarian"
+          >
+            <XIcon />
+          </button>
+        )}
+      </div>
+
       {/* Add Form — inline */}
       <form onSubmit={handleAdd} className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-md">
         <div>
@@ -162,7 +217,10 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
 
       {/* List — clickable cards */}
       <div className="space-y-2">
-        {suppliers.map((s) => (
+        {filteredSuppliers.length === 0 ? (
+          <p className="text-sm text-ink-light py-6 text-center">Tidak ada supplier yang cocok.</p>
+        ) : (
+          filteredSuppliers.map((s) => (
           <button
             key={s.id}
             onClick={() => openDetail(s)}
@@ -171,7 +229,8 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
             <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
             {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
           </button>
-        ))}
+        ))
+        )}
       </div>
 
       {/* Detail Bottomsheet / Modal */}
