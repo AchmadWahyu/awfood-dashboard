@@ -8,16 +8,19 @@ import { formatRp, formatDateTime } from "@/lib/utils/format";
 import { toast } from "sonner";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 
-function NotebookInput({ value, onChange, readOnly }: { value: number; onChange: (v: number) => void; readOnly?: boolean }) {
+function StockInput({ value, onChange, label, readOnly }: { value: number; onChange: (v: number) => void; label: string; readOnly?: boolean }) {
   return (
-    <input
-      type="number"
-      min={0}
-      value={value || ""}
-      onChange={(e) => onChange(Math.max(0, parseInt(e.target.value) || 0))}
-      disabled={readOnly}
-      className="w-14 bg-transparent text-center outline-none border-0 border-b-2 border-ruled focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-    />
+    <div className="flex flex-col items-center gap-1 grow">
+      <label className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">{label}</label>
+      <input
+        type="number"
+        min={0}
+        value={value || ""}
+        onChange={(e) => onChange(Math.max(0, parseInt(e.target.value) || 0))}
+        disabled={readOnly}
+        className="w-28 rounded-lg border border-ruled bg-paper-light py-2 text-center text-sm font-semibold text-ink outline-none focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      />
+    </div>
   );
 }
 
@@ -108,11 +111,11 @@ export default function EmployeePenutupanClient({
         prev.map((si) =>
           si.supplierId === supplierId
             ? {
-                ...si,
-                entries: si.entries.map((e) =>
-                  e.itemId === itemId ? { ...e, [field]: value } : e
-                ),
-              }
+              ...si,
+              entries: si.entries.map((e) =>
+                e.itemId === itemId ? { ...e, [field]: value } : e
+              ),
+            }
             : si
         )
       );
@@ -146,8 +149,15 @@ export default function EmployeePenutupanClient({
     openSupplierId && filteredSuppliers.some((si) => si.supplierId === openSupplierId)
       ? openSupplierId
       : filteredSuppliers.length > 0
-      ? filteredSuppliers[0].supplierId
-      : null;
+        ? filteredSuppliers[0].supplierId
+        : null;
+
+  // Auto-expand first matching supplier when searching
+  useEffect(() => {
+    if (searchQuery.trim() && filteredSuppliers.length > 0) {
+      setOpenSupplierId(filteredSuppliers[0].supplierId);
+    }
+  }, [searchQuery, filteredSuppliers]);
 
   const calcTerjual = (awal: number, akhir: number) => {
     return Math.max(0, (awal || 0) - (akhir || 0));
@@ -276,7 +286,7 @@ export default function EmployeePenutupanClient({
           {error}
         </div>
       )}
-      
+
       <div className="mb-2 rounded-xl border border-marker/20 bg-marker-light px-4 py-2.5 text-xs text-marker">
         Data akan disimpan ke Supabase. Pastikan koneksi aktif.
       </div>
@@ -305,7 +315,7 @@ export default function EmployeePenutupanClient({
           <div key={si.supplierId} className="rounded-2xl border border-notch-border bg-paper-light shadow-sm overflow-hidden">
             <button
               onClick={() => setOpenSupplierId(isOpen ? null : si.supplierId)}
-              className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-paper transition-colors"
+              className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-paper transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-marker/40" />
@@ -324,40 +334,43 @@ export default function EmployeePenutupanClient({
               </div>
             </button>
             {isOpen && (
-              <div className="border-t border-ruled px-6 py-4">
-                <div className="overflow-x-auto">
-                  <table className="aw-table min-w-[480px]">
-                    <thead>
-                      <tr>
-                        <th>PRODUK</th>
-                        <th className="text-center">STOK AWAL</th>
-                        <th className="text-center">STOK AKHIR</th>
-                        <th className="text-right">TERJUAL</th>
-                        <th className="text-right">TOTAL</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {si.entries.map((entry: any) => {
-                        const terjual = calcTerjual(entry.openingStock, entry.endingStock);
-                        const totalRow = terjual * entry.unitPrice;
-                        const hasData = (entry.openingStock || 0) > 0 || (entry.endingStock || 0) > 0;
-                        return (
-                          <tr key={entry.itemId}>
-                            <td className="font-medium whitespace-nowrap">{entry.itemName}</td>
-                            <td className="text-center">
-                              <NotebookInput value={entry.openingStock} onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "openingStock", v)} />
-                            </td>
-                            <td className="text-center">
-                              <NotebookInput value={entry.endingStock} onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "endingStock", v)} />
-                            </td>
-                            <td className={`text-right font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</td>
-                            <td className={`text-right font-bold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="border-t border-ruled px-4 py-4 space-y-3">
+                {si.entries.map((entry: any) => {
+                  const terjual = calcTerjual(entry.openingStock, entry.endingStock);
+                  const totalRow = terjual * entry.unitPrice;
+                  const hasData = (entry.openingStock || 0) > 0 || (entry.endingStock || 0) > 0;
+                  return (
+                    <div
+                      data-testid={`closing-card-${si.supplierId}-item-${entry.itemId}`}
+                      key={entry.itemId}
+                      className={`rounded-xl border p-4 transition-colors ${hasData ? "bg-marker-light/30 border-marker/20" : "border-ruled bg-paper-light"}`}
+                    >
+                      <div className="flex items-center justify-between align-center gap-4 mb-3">
+                        <p className="text-sm font-semibold text-ink truncate">{entry.itemName}</p>
+                        <span className={`text-xs font-semibold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 grow">
+                          <StockInput
+                            label="Stok Awal"
+                            value={entry.openingStock}
+                            onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "openingStock", v)}
+                          />
+                          <span className="text-ink-light/40 text-lg">→</span>
+                          <StockInput
+                            label="Stok Akhir"
+                            value={entry.endingStock}
+                            onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "endingStock", v)}
+                          />
+                        </div>
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
+                          <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -368,46 +381,46 @@ export default function EmployeePenutupanClient({
       <div className="flex items-center gap-3 border-l-4 border-ink pl-3">
         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-light/60">Minuman Milik Sendiri</span>
       </div>
-      <div className="rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="aw-table min-w-[480px]">
-            <thead>
-              <tr>
-                <th>MINUMAN</th>
-                <th className="text-center">STOK AWAL</th>
-                <th className="text-center">STOK AKHIR</th>
-                <th className="text-right">TERJUAL</th>
-                <th className="text-right">TOTAL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {beverageInputs.map((entry) => {
-                const terjual = calcTerjual(entry.openingStock, entry.endingStock);
-                const totalRow = terjual * entry.unitPrice;
-                const hasData = (entry.openingStock || 0) > 0 || (entry.endingStock || 0) > 0;
-                return (
-                  <tr key={entry.itemId}>
-                    <td className="font-medium whitespace-nowrap">{entry.itemName}</td>
-                    <td className="text-center">
-                      <NotebookInput value={entry.openingStock} onChange={(v) => updateBeverageStok(entry.itemId, "openingStock", v)} />
-                    </td>
-                    <td className="text-center">
-                      <NotebookInput value={entry.endingStock} onChange={(v) => updateBeverageStok(entry.itemId, "endingStock", v)} />
-                    </td>
-                    <td className={`text-right font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</td>
-                    <td className={`text-right font-bold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className="rounded-2xl border border-notch-border bg-paper-light p-4 shadow-sm space-y-3">
+        {beverageInputs.map((entry) => {
+          const terjual = calcTerjual(entry.openingStock, entry.endingStock);
+          const totalRow = terjual * entry.unitPrice;
+          const hasData = (entry.openingStock || 0) > 0 || (entry.endingStock || 0) > 0;
+          return (
+            <div
+              key={entry.itemId}
+              className={`rounded-xl border p-4 transition-colors ${hasData ? "bg-marker-light/30 border-marker/20" : "border-ruled bg-paper-light"}`}
+            >
+              <p className="text-sm font-semibold text-ink mb-3">{entry.itemName}</p>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <StockInput
+                    label="Stok Awal"
+                    value={entry.openingStock}
+                    onChange={(v) => updateBeverageStok(entry.itemId, "openingStock", v)}
+                  />
+                  <span className="text-ink-light/40 text-lg">→</span>
+                  <StockInput
+                    label="Stok Akhir"
+                    value={entry.endingStock}
+                    onChange={(v) => updateBeverageStok(entry.itemId, "endingStock", v)}
+                  />
+                </div>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
+                  <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
+                  <span className={`text-xs font-semibold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Kas Fisik */}
       <div className="rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm">
         <h3 className="mb-3 text-sm font-bold text-marker">Kas</h3>
-          <div>
+        <div>
           <label className="block text-xs text-ink-light mb-1.5">Total uang kas di laci saat tutup</label>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-ink">Rp</span>
