@@ -8,11 +8,11 @@ import { formatNumber } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-export default function OwnerItemsClient({ 
-  initialItems, 
-  initialSuppliers, 
-  initialBeverages 
-}: { 
+export default function OwnerItemsClient({
+  initialItems,
+  initialSuppliers,
+  initialBeverages
+}: {
   initialItems: Item[];
   initialSuppliers: { id: string; name: string }[];
   initialBeverages: Item[];
@@ -20,25 +20,25 @@ export default function OwnerItemsClient({
   const [items, setItems] = useState<Item[]>(initialItems);
   const [suppliers] = useState(initialSuppliers);
   const [beverages] = useState(initialBeverages);
-  
+
   // Add form (inline)
-  const [addForm, setAddForm] = useState({ 
-    name: "", 
-    supplier_id: "", 
-    type: "KONSINYASI_KUE" as ItemType, 
-    cost_price: "", 
-    selling_price: "" 
+  const [addForm, setAddForm] = useState({
+    name: "",
+    supplier_id: "",
+    type: "KONSINYASI_KUE" as ItemType,
+    cost_price: "",
+    selling_price: ""
   });
 
   // Edit form (bottomsheet/modal)
   const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ 
+  const [editForm, setEditForm] = useState({
     id: "",
-    name: "", 
-    supplier_id: "", 
-    type: "KONSINYASI_KUE" as ItemType, 
-    cost_price: "", 
-    selling_price: "" 
+    name: "",
+    supplier_id: "",
+    type: "KONSINYASI_KUE" as ItemType,
+    cost_price: "",
+    selling_price: ""
   });
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -68,13 +68,13 @@ export default function OwnerItemsClient({
   };
 
   const openEdit = (i: Item) => {
-    setEditForm({ 
+    setEditForm({
       id: i.id,
-      name: i.name, 
-      supplier_id: i.supplier_id || "", 
-      type: i.category, 
-      cost_price: String(i.cost_price), 
-      selling_price: String(i.selling_price) 
+      name: i.name,
+      supplier_id: i.supplier_id || "",
+      type: i.category,
+      cost_price: String(i.cost_price),
+      selling_price: String(i.selling_price)
     });
     setEditOpen(true);
   };
@@ -146,7 +146,7 @@ export default function OwnerItemsClient({
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Items</h2>
-      
+
       {/* Add Form — inline */}
       <form onSubmit={handleAdd} className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-lg">
         <div className="grid grid-cols-2 gap-3">
@@ -194,10 +194,10 @@ export default function OwnerItemsClient({
               <div>
                 <p className="text-sm font-bold text-ink">{i.name} {i.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
                 <p className="text-xs text-ink-light">
-                  {i.category === "KONSINYASI_KUE" ? `Konsinyasi${sup ? ` — ${sup.name}` : ""}` : i.category === "MINUMAN_OWNER" ? "Minuman Owner" : "Ayam Penyet"} · 
-                  Beli {formatNumber(i.cost_price)} · 
-                  Jual {formatNumber(i.selling_price)}
+                  {i.category === "KONSINYASI_KUE" ? `${sup ? `${sup.name}` : ""}` : i.category === "MINUMAN_OWNER" ? "Minuman Owner" : "Ayam Penyet"} ·
                 </p>
+                <p className="text-xs text-ink-light">Beli {formatNumber(i.cost_price)} · </p>
+                <p className="text-xs text-ink-light">Jual {formatNumber(i.selling_price)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => openEdit(i)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
@@ -223,7 +223,7 @@ export default function OwnerItemsClient({
             className="animate-sheet-up max-h-[88dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl border-t border-notch-border bg-paper-light p-6 pb-8 shadow-xl sm:max-w-lg sm:rounded-3xl sm:border sm:mb-6"
           >
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ruled" />
-            
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-ink">Edit Item</h3>
               <button onClick={closeEdit} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup">
