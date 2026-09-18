@@ -4,17 +4,26 @@ import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { createSupplier, updateSupplier, toggleSupplierActive, deleteSupplier, getSuppliers } from "./actions";
 import type { Supplier } from "./actions";
+import { getItemsBySupplier } from "../items/actions";
+import type { Item } from "../items/actions";
+import { formatRp } from "@/lib/utils/format";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppliers: Supplier[] }) {
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
-  
+
   // Add form (inline)
   const [addForm, setAddForm] = useState({ name: "", phone: "" });
 
   // Edit form (bottomsheet/modal)
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({ id: "", name: "", phone: "" });
+
+  // Detail bottomsheet
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailSupplier, setDetailSupplier] = useState<Supplier | null>(null);
+  const [detailItems, setDetailItems] = useState<Item[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -39,6 +48,27 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       toast.error(err.message || "Gagal menambah supplier.");
     }
   };
+
+  const openDetail = async (s: Supplier) => {
+    setDetailSupplier(s);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    try {
+      const items = await getItemsBySupplier(s.id);
+      setDetailItems(items);
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memuat item supplier.");
+      setDetailItems([]);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetail = useCallback(() => {
+    setDetailOpen(false);
+    setDetailSupplier(null);
+    setDetailItems([]);
+  }, []);
 
   const openEdit = (s: Supplier) => {
     setEditForm({ id: s.id, name: s.name, phone: s.phone_number || "" });
@@ -72,6 +102,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       await toggleSupplierActive(id, !is_active);
       toast.success("Status supplier diperbarui.");
       await refresh();
+      closeDetail();
     } catch (err: any) {
       toast.error(err.message || "Gagal memperbarui status supplier.");
     }
@@ -89,6 +120,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       await deleteSupplier(confirmId);
       toast.success("Supplier berhasil dihapus.");
       await refresh();
+      closeDetail();
     } catch (err: any) {
       toast.error(err.message || "Gagal menghapus supplier.");
     } finally {
@@ -96,20 +128,23 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
     }
   };
 
-  // Escape to close edit
+  // Escape to close sheets
   useEffect(() => {
-    if (!editOpen) return;
+    if (!editOpen && !detailOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeEdit();
+      if (e.key === "Escape") {
+        if (editOpen) closeEdit();
+        else if (detailOpen) closeDetail();
+      }
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [editOpen, closeEdit]);
+  }, [editOpen, detailOpen, closeEdit, closeDetail]);
 
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Supplier</h2>
-      
+
       {/* Add Form — inline */}
       <form onSubmit={handleAdd} className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-md">
         <div>
@@ -125,22 +160,90 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
         </div>
       </form>
 
-      {/* List */}
+      {/* List — clickable cards */}
       <div className="space-y-2">
         {suppliers.map((s) => (
-          <div key={s.id} className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4">
-            <div>
-              <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
-              {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => openEdit(s)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
-              <button onClick={() => handleToggle(s.id, s.is_active)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">{s.is_active ? "Nonaktifkan" : "Aktifkan"}</button>
-              <button onClick={() => handleDelete(s.id)} className="rounded-lg border border-ruled px-2 py-1 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
-            </div>
-          </div>
+          <button
+            key={s.id}
+            onClick={() => openDetail(s)}
+            className="w-full text-left rounded-xl border border-notch-border bg-paper-light p-4 hover:bg-paper transition-colors"
+          >
+            <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
+            {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
+          </button>
         ))}
       </div>
+
+      {/* Detail Bottomsheet / Modal */}
+      {detailOpen && detailSupplier && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
+          onClick={closeDetail}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Detail supplier ${detailSupplier.name}`}
+            onClick={(e) => e.stopPropagation()}
+            className="animate-sheet-up max-h-[88dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl border-t border-notch-border bg-paper-light p-6 pb-8 shadow-xl sm:max-w-lg sm:rounded-3xl sm:border sm:mb-6"
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ruled" />
+
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-ink">{detailSupplier.name}</h3>
+              <button onClick={closeDetail} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup">
+                Tutup
+              </button>
+            </div>
+
+            <div className="mt-2 flex items-center gap-2 text-xs text-ink-light">
+              {detailSupplier.phone_number && <span>{detailSupplier.phone_number}</span>}
+              <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${detailSupplier.is_active ? "bg-notch-success text-notch-success-text" : "bg-ruled/30 text-ink-light"}`}>
+                {detailSupplier.is_active ? "Aktif" : "Nonaktif"}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 mt-4">
+              <button onClick={() => { closeDetail(); openEdit(detailSupplier); }} className="rounded-lg border border-notch-border px-3 py-1.5 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
+              <button onClick={() => handleToggle(detailSupplier.id, detailSupplier.is_active)} className="rounded-lg border border-notch-border px-3 py-1.5 text-xs text-ink-light hover:bg-paper transition-colors">{detailSupplier.is_active ? "Nonaktifkan" : "Aktifkan"}</button>
+              <button onClick={() => handleDelete(detailSupplier.id)} className="rounded-lg border border-ruled px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
+            </div>
+
+            {/* Items */}
+            <div className="mt-4 space-y-2">
+              <h4 className="text-xs font-bold text-ink-light uppercase tracking-wide">Daftar Kue</h4>
+              {detailLoading ? (
+                <div className="space-y-2 animate-pulse">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="rounded-xl border border-notch-border bg-paper-light p-3 space-y-2">
+                      <div className="h-4 w-32 bg-ruled rounded" />
+                      <div className="h-3 w-48 bg-ruled rounded" />
+                    </div>
+                  ))}
+                </div>
+              ) : detailItems.length === 0 ? (
+                <p className="text-sm text-ink-light py-4 text-center">Tidak ada kue dari supplier ini.</p>
+              ) : (
+                detailItems.map((item) => (
+                  <div key={item.id} className="rounded-xl border border-notch-border bg-paper-light p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-ink">{item.name}</p>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${item.is_active ? "bg-notch-success text-notch-success-text" : "bg-ruled/30 text-ink-light"}`}>
+                        {item.is_active ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-ink-light">
+                      <span>Modal: <strong className="text-ink tabular-nums">{formatRp(item.cost_price)}</strong></span>
+                      <span>Jual: <strong className="text-ink tabular-nums">{formatRp(item.selling_price)}</strong></span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Bottomsheet / Modal */}
       {editOpen && (
@@ -156,7 +259,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
             className="animate-sheet-up max-h-[88dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl border-t border-notch-border bg-paper-light p-6 pb-8 shadow-xl sm:max-w-lg sm:rounded-3xl sm:border sm:mb-6"
           >
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ruled" />
-            
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-ink">Edit Supplier</h3>
               <button onClick={closeEdit} className="rounded-lg border border-notch-border px-3 py-1 text-xs font-bold text-ink-light hover:bg-paper transition-colors" aria-label="Tutup">
