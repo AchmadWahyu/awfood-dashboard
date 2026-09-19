@@ -15,29 +15,46 @@
     "seed:staging": "node scripts/seed.mjs staging",
     "seed:staging:all": "node scripts/seed-staging.mjs",
     "seed:items:staging": "node scripts/seed-items-suppliers.mjs staging",
-    "seed:items:prod": "node scripts/seed-items-suppliers.mjs"
+    "seed:items:prod": "node scripts/seed-items-suppliers.mjs",
+    "dev:vinext": "vinext dev --port 3001",
+    "dev:staging:vinext": "powershell -File switch-env.ps1 staging && vinext dev --port 3001",
+    "dev:production:vinext": "powershell -File switch-env.ps1 production && vinext dev --port 3001",
+    "build:vinext": "vinext build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "deploy:response-store": "wrangler deploy --config wrangler.response-store.jsonc"
   },
   "dependencies": {
+    "@cloudflare/workers-response-store": "0.1.0-beta.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
+    "@vinext/cloudflare": "1.0.0-beta.8",
     "bcryptjs": "^3.0.3",
     "next": "16.2.10",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-server-dom-webpack": "^19.3.0",
     "recharts": "^3.10.1",
     "sonner": "^2.0.8",
+    "vinext": "1.0.0-beta.10",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.55.0",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-rsc": "^0.5.35",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.11"
-  }
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.134.0"
+  },
+  "type": "module"
 }
