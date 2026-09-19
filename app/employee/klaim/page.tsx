@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSyncStorage } from "@/lib/dummy/sync";
 import { getActiveItems, getClosings, addClaim, getClaims } from "@/lib/dummy/api";
@@ -14,11 +14,11 @@ const TYPES: { value: ClaimType; label: string }[] = [
 ];
 
 export default function EmployeeKlaimPage() {
-  const [version, setVersion] = useState(0);
+  const [, setVersion] = useState(0);
   useSyncStorage(() => setVersion((v) => v + 1));
   const { user } = useAuth();
-  const items = useMemo(() => getActiveItems(), [version]);
-  const closings = useMemo(() => getClosings().filter((c) => c.status !== "draft"), [version]);
+  const items = getActiveItems();
+  const closings = getClosings().filter((c) => c.status !== "draft");
   const [closingId, setClosingId] = useState("");
   const [itemId, setItemId] = useState("");
   const [type, setType] = useState<ClaimType>("rusak");
@@ -48,7 +48,9 @@ export default function EmployeeKlaimPage() {
     setTimeout(() => setOk(false), 3000);
   };
 
-  const myClaims = useMemo(() => getClaims().filter((c) => c.requested_by === user?.id).sort((a, b) => +new Date(b.requested_at) - +new Date(a.requested_at)), [user, version]);
+  const myClaims = getClaims()
+    .filter((c) => c.requested_by === user?.id)
+    .sort((a, b) => +new Date(b.requested_at) - +new Date(a.requested_at));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 space-y-6">

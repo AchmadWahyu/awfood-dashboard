@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { toast } from "sonner";
 import { addExpense, deleteExpense, getExpenses } from "./actions";
 import type { Expense, ExpenseCategory, Pocket } from "@/lib/dummy/types";
@@ -90,8 +90,8 @@ export default function PengeluaranClient({
         });
         toast.success("Pengeluaran berhasil dicatat.");
         await refresh(selectedDate);
-      } catch (err: any) {
-        toast.error(err.message || "Gagal menambah pengeluaran.");
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : "Gagal menambah pengeluaran.");
       }
     });
   };
@@ -109,8 +109,8 @@ export default function PengeluaranClient({
       await deleteExpense(confirmId);
       toast.success("Pengeluaran berhasil dihapus.");
       await refresh(selectedDate);
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus pengeluaran.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus pengeluaran.");
     } finally {
       setDeletingId(null);
       setConfirmId(null);

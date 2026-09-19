@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, startTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import type { RequestEdit, DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getAllRequestEdits, getRequestEditDetail, approveRequestEdit, rejectRequestEdit } from "./actions";
-import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
+import { formatRp, formatDateDisplay } from "@/lib/utils/format";
 
 const STATUS_BADGE: Record<string, string> = {
   pending: "bg-ruled/30 text-ink-light",
@@ -47,13 +47,6 @@ export default function OwnerRequestEditClient({
   const [rejectReasonInput, setRejectReasonInput] = useState("");
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const editId = searchParams.get("edit");
-    if (editId && edits.some((e) => e.id === editId)) {
-      openDetail(editId);
-    }
-  }, [searchParams, edits]);
-
   const supplierGroups = useMemo(() => {
     if (!selected || !closing) return [];
     const groups = new Map<string, SupplierGroup>();
@@ -86,7 +79,7 @@ export default function OwnerRequestEditClient({
     setEdits(data);
   }, []);
 
-  const openDetail = async (id: string) => {
+  const openDetail = useCallback(async (id: string) => {
     setSelectedId(id);
     setIsLoading(true);
     try {
@@ -100,7 +93,16 @@ export default function OwnerRequestEditClient({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (editId && edits.some((e) => e.id === editId)) {
+      startTransition(() => {
+        void openDetail(editId);
+      });
+    }
+  }, [searchParams, edits, openDetail]);
 
   const closeDetail = useCallback(() => {
     setSelectedId(null);
@@ -140,8 +142,8 @@ export default function OwnerRequestEditClient({
       toast.success("Request edit disetujui.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memproses request edit.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memproses request edit.");
       console.error(err);
     }
   };
@@ -153,8 +155,8 @@ export default function OwnerRequestEditClient({
       toast.success("Request edit ditolak.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memproses request edit.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memproses request edit.");
       console.error(err);
     }
   };

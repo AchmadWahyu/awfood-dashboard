@@ -1,4 +1,7 @@
-// Mock Supabase client for testing
+// Mock Supabase client for testing.
+// The fluent query builder is intentionally dynamic; production Supabase types
+// are not available in this in-memory test double.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Usage: const mockClient = createMockSupabaseClient({ profiles: [...] });
 
 export type MockData = {
@@ -25,12 +28,10 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
 
   let currentTable: string | null = null;
   let currentFilters: { column: string; value: any; op?: string }[] = [];
-  let currentSingle = false;
   let currentOrder: { column: string; ascending: boolean } | null = null;
 
   const reset = () => {
     currentFilters = [];
-    currentSingle = false;
     currentOrder = null;
   };
 
@@ -74,13 +75,12 @@ export function createMockSupabaseClient(mockData: MockData = {}) {
       reset();
 
       return {
-        select: (_columns = "*") => {
+        select: () => {
           const chain = {
             eq: (column: string, value: any) => {
               currentFilters.push({ column, value });
               return {
                 single: () => {
-                  currentSingle = true;
                   const result = getTableData();
                   reset();
                   return Promise.resolve({ data: result[0] ?? null, error: null });

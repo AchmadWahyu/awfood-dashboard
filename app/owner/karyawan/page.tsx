@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { getUsers, addUser, updateUser, removeUser } from "@/lib/dummy/api";
 import type { User } from "@/lib/dummy/types";
 

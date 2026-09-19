@@ -1,31 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getSuppliers, getSettlements, addSettlement, getClosings, addLedgerEntry } from "@/lib/dummy/api";
+import { getSuppliers, getSettlements, addSettlement, addLedgerEntry } from "@/lib/dummy/api";
 import { todayLocal } from "@/lib/utils/date";
 import { formatRp } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
-import type { SupplierSettlement, SupplierLedgerEntry } from "@/lib/dummy/types";
 
 export default function OwnerLedgerPage() {
   const suppliers = useMemo(() => getSuppliers().filter((s) => s.is_active), []);
   const settlements = useMemo(() => getSettlements(), []);
-  const closings = useMemo(() => getClosings(), []);
-  const [ledger, setLedger] = useState<SupplierLedgerEntry[]>(() => {
-    // build ledger from closings + settlements
-    const entries: SupplierLedgerEntry[] = [];
-    for (const c of closings) {
-      for (const si of suppliers) {
-        const items = c.items.filter((i) => {
-          // lookup by item; simplified: we dont have item->supplier in closing item, skip detailed
-          return false;
-        });
-        // Simplified: just dummy ledger
-      }
-    }
-    return [];
-  });
-
   const [form, setForm] = useState({ supplier_id: "", amount: "", method: "tunai" as "tunai" | "transfer", reference: "" });
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
 
@@ -99,7 +82,7 @@ export default function OwnerLedgerPage() {
               </div>
               <div>
                 <label className="block text-xs text-ink-light mb-1">Metode</label>
-                <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value as any })} className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker">
+                <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value as "tunai" | "transfer" })} className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker">
                   <option value="tunai">Tunai</option>
                   <option value="transfer">Transfer</option>
                 </select>

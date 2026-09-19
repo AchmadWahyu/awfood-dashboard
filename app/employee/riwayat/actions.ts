@@ -1,8 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
-import type { DailyClosing, ClosingItem, Item, Supplier, Expense } from "@/lib/dummy/types";
+import type { DailyClosing, Item, Supplier, Expense } from "@/lib/dummy/types";
 
 export async function getClosingsByStaff(): Promise<DailyClosing[]> {
   const supabase = await createClient();
@@ -103,17 +102,7 @@ export async function getClosingDetail(closingId: string) {
     console.error("Error fetching master items:", masterItemsError);
   }
 
-  const { data: suppliers, error: suppliersError } = await supabase
-    .from("suppliers")
-    .select("*");
-
-  if (suppliersError) {
-    console.error("Error fetching suppliers:", suppliersError);
-  }
-
   const itemsMap = new Map((masterItems || []).map((i) => [i.id, i]));
-  const suppliersMap = new Map((suppliers || []).map((s) => [s.id, s]));
-
   const expenses = await getExpensesByDate(closing.closing_date);
 
   const closingItems = (items || []).map((ci) => {
@@ -130,7 +119,7 @@ export async function getClosingDetail(closingId: string) {
         id: masterItem.id,
         name: masterItem.name,
         supplier_id: masterItem.supplier_id,
-        type: masterItem.category as any,
+         type: masterItem.category as Item["type"],
         price_buy: Number(masterItem.cost_price),
         price_sell: Number(masterItem.selling_price),
         is_active: masterItem.is_active,
@@ -193,7 +182,7 @@ export async function getItems(): Promise<Item[]> {
     id: i.id,
     name: i.name,
     supplier_id: i.supplier_id,
-    type: i.category as any,
+     type: i.category as Item["type"],
     price_buy: Number(i.cost_price),
     price_sell: Number(i.selling_price),
     is_active: i.is_active,

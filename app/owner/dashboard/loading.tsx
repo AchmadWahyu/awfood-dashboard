@@ -1,7 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
-  return (
+const Loading = () => (
     <div className="p-6 space-y-6">
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4">
@@ -21,5 +20,6 @@ export default function Loading() {
         <Skeleton className="h-12 w-full" />
       </div>
     </div>
-  );
-}
+);
+
+export default Loading;

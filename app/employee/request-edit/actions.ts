@@ -2,8 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { DailyClosing, ClosingItem, RequestEdit, Item, Supplier } from "@/lib/dummy/types";
-import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
+import type { DailyClosing, ClosingItem, RequestEdit, Item } from "@/lib/dummy/types";
+import { getItems } from "@/app/employee/riwayat/actions";
+
+type RequestEditItemInput = Partial<ClosingItem> & {
+  initial_stock?: number;
+  remaining_stock?: number;
+  sold_quantity?: number;
+};
 
 export async function getRequestEditsByStaff(): Promise<RequestEdit[]> {
   const supabase = await createClient();
@@ -21,17 +27,13 @@ export async function getRequestEditsByStaff(): Promise<RequestEdit[]> {
     return [];
   }
 
-  const [items, suppliers] = await Promise.all([
-    getItems(),
-    getSuppliers(),
-  ]);
-
-  const itemsMap = new Map(items.map((i) => [i.id, i]));
-  const suppliersMap = new Map(suppliers.map((s) => [s.id, s]));
-
   return (requestEdits || []).map((re) => {
-    const itemsData = typeof re.changes === 'string' ? JSON.parse(re.changes) : re.changes;
-    const parsedItems: ClosingItem[] = Array.isArray(itemsData) ? itemsData : [];
+    const itemsData = typeof re.changes === "string" ? JSON.parse(re.changes) : re.changes;
+    const rawItems = Array.isArray(itemsData) ? itemsData : itemsData?.items;
+    const parsedItems = (Array.isArray(rawItems) ? rawItems : []) as RequestEditItemInput[];
+    const cashPhysical = !Array.isArray(itemsData) && typeof itemsData?.cash_physical === "number"
+      ? itemsData.cash_physical
+      : 0;
     
     return {
       id: re.id,
@@ -40,31 +42,57 @@ export async function getRequestEditsByStaff(): Promise<RequestEdit[]> {
       status: re.status?.toLowerCase() || "pending",
       requested_by: re.staff_id,
       requested_at: re.created_at,
-      approved_by: null,
-      approved_at: null,
-      items: parsedItems.map((item: any, idx: number) => ({
+      approved_by: re.approved_by ?? null,
+      approved_at: re.approved_at ?? null,
+      items: parsedItems.map((item, idx) => ({
         id: item.id || `item-${idx}`,
-        item_id: item.item_id,
-        stok_awal: item.initial_stock || 0,
-        stok_akhir: item.remaining_stock || 0,
-        terjual: item.sold_quantity || 0,
-        total_rp: 0,
+        item_id: item.item_id ?? "",
+        stok_awal: item.stok_awal ?? item.initial_stock ?? 0,
+        stok_akhir: item.stok_akhir ?? item.remaining_stock ?? 0,
+        terjual: item.terjual ?? item.sold_quantity ?? 0,
+        total_rp: item.total_rp ?? 0,
       })),
       cash_initial: 0,
-      cash_physical: 0,
+      cash_physical: cashPhysical,
     };
   });
 }
 
 export async function createRequestEdit(formData: {
   closingId: string;
-  items: any[];
+  items: ClosingItem[];
   cashPhysical: number;
   reason: string;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  const { data: closing, error: closingError } = await supabase
+    .from("daily_closings")
+    .select("id, status")
+    .eq("id", formData.closingId)
+    .eq("staff_id", user.id)
+    .single();
+
+  if (closingError || !closing) {
+    throw new Error("Closing tidak ditemukan atau bukan milik staff ini");
+  }
+
+  if (closing.status === "draft" || closing.status === "rejected") {
+    throw new Error("Closing belum dapat diajukan untuk request edit");
+  }
+
+  const { data: pendingRequest, error: pendingError } = await supabase
+    .from("audit_request_edits")
+    .select("id")
+    .eq("target_id", formData.closingId)
+    .eq("staff_id", user.id)
+    .eq("status", "PENDING")
+    .maybeSingle();
+
+  if (pendingError) throw new Error(pendingError.message);
+  if (pendingRequest) throw new Error("Masih ada request edit yang menunggu persetujuan");
 
   const { data: requestEdit, error } = await supabase
     .from("audit_request_edits")
@@ -113,14 +141,9 @@ export async function getClosingDetailForRequestEdit(closingId: string) {
     console.error("Error fetching closing items:", itemsError);
   }
 
-  const [masterItems, suppliers] = await Promise.all([
-    getItems(),
-    getSuppliers(),
-  ]);
+  const masterItems = await getItems();
 
   const itemsMap = new Map(masterItems.map((i) => [i.id, i]));
-  const suppliersMap = new Map(suppliers.map((s) => [s.id, s]));
-
   const closingItems: (ClosingItem & { item: Item })[] = (items || []).map((ci) => {
     const masterItem = itemsMap.get(ci.item_id);
     if (!masterItem) return null;

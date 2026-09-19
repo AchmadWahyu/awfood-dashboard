@@ -1,7 +1,11 @@
 "use client";
 
-export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  return (
+type GlobalErrorProps = {
+  error: Error & { digest?: string };
+  reset: () => void;
+};
+
+const GlobalError = ({ reset }: GlobalErrorProps) => (
     <html>
       <body className="min-h-[100dvh] flex items-center justify-center bg-paper text-ink">
         <div className="text-center space-y-4 p-6">
@@ -11,5 +15,6 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         </div>
       </body>
     </html>
-  );
-}
+);
+
+export default GlobalError;

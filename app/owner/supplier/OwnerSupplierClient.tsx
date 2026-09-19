@@ -76,8 +76,8 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       toast.success("Supplier berhasil ditambahkan.");
       setAddForm({ name: "", phone: "" });
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menambah supplier.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menambah supplier.");
     }
   };
 
@@ -124,8 +124,8 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       toast.success("Supplier berhasil diperbarui.");
       closeEdit();
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memperbarui supplier.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memperbarui supplier.");
     }
   };
 
@@ -135,8 +135,8 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       toast.success("Status supplier diperbarui.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memperbarui status supplier.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memperbarui status supplier.");
     }
   };
 
@@ -153,8 +153,8 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
       toast.success("Supplier berhasil dihapus.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus supplier.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus supplier.");
     } finally {
       setConfirmId(null);
     }
@@ -221,15 +221,15 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
           <p className="text-sm text-ink-light py-6 text-center">Tidak ada supplier yang cocok.</p>
         ) : (
           filteredSuppliers.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => openDetail(s)}
-            className="w-full text-left rounded-xl border border-notch-border bg-paper-light p-4 hover:bg-paper transition-colors"
-          >
-            <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
-            {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
-          </button>
-        ))
+            <button
+              key={s.id}
+              onClick={() => openDetail(s)}
+              className="w-full text-left rounded-xl border border-notch-border bg-paper-light p-4 hover:bg-paper transition-colors"
+            >
+              <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
+              {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
+            </button>
+          ))
         )}
       </div>
 

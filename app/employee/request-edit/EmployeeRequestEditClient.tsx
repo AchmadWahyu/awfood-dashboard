@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, startTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -53,7 +53,7 @@ export default function EmployeeRequestEditClient({
   const { user } = useAuth();
   const searchParams = useSearchParams();
 
-  const [closings, setClosings] = useState<DailyClosing[]>(initialClosings);
+  const closings = initialClosings;
   const [items] = useState<Item[]>(initialItems);
   const [suppliers] = useState<Supplier[]>(initialSuppliers);
   const [myReqs, setMyReqs] = useState<RequestEdit[]>(initialRequestEdits);
@@ -71,7 +71,7 @@ export default function EmployeeRequestEditClient({
     return closingId ? closings.find((c) => c.id === closingId) || null : null;
   }, [closingId, closings]);
 
-  const loadClosing = async (id: string) => {
+  const loadClosing = useCallback(async (id: string) => {
     setClosingId(id);
     setIsLoadingDetail(true);
     try {
@@ -114,14 +114,17 @@ export default function EmployeeRequestEditClient({
     } finally {
       setIsLoadingDetail(false);
     }
-  };
+  }, [items, suppliers]);
 
+  // Load the closing selected in the URL without blocking the request form.
   useEffect(() => {
     const id = searchParams.get("closing");
     if (id && closings.some((c) => c.id === id)) {
-      loadClosing(id);
+      startTransition(() => {
+        void loadClosing(id);
+      });
     }
-  }, [searchParams, closings]);
+  }, [searchParams, closings, loadClosing]);
 
   useEffect(() => {
     const loadRequestEdits = async () => {
@@ -191,8 +194,8 @@ export default function EmployeeRequestEditClient({
       setMyReqs(reqs);
       
       setTimeout(() => setOk(false), 3000);
-    } catch (err: any) {
-      toast.error(err.message || "Gagal mengajukan request edit. Coba lagi.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal mengajukan request edit. Coba lagi.");
       console.error(err);
     } finally {
       setIsSubmitting(false);

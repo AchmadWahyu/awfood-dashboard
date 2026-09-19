@@ -72,21 +72,6 @@ export const seedItems: Item[] = [
   { id: "item-52", name: "Es Jeruk", supplier_id: null, type: "MINUMAN_OWNER", price_buy: 1500, price_sell: 4000, is_active: true, created_at: "2024-01-01T00:00:00Z" },
 ];
 
-// Keys untuk master data (tidak di-reset saat re-initialization)
-const MASTER_DATA_KEYS = ["users", "suppliers", "items"] as const;
-
-// Keys untuk transaction data (bisa di-reset terpisah)
-const TRANSACTION_DATA_KEYS = [
-  "restocks",
-  "closings",
-  "claims",
-  "request_edits",
-  "settlements",
-  "expenses",
-  "deductions",
-  "ledger",
-] as const;
-
 /**
  * Seed master data: users, suppliers, items
  * Dipanggil sekali saat inisialisasi pertama kali
