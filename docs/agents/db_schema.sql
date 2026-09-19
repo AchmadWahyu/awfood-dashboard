@@ -52,9 +52,9 @@ CREATE TRIGGER on_auth_user_created
 -- Enable RLS di public.profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Authenticated users can view profiles" 
-    ON public.profiles FOR SELECT 
-    USING (auth.role() = 'authenticated');
+CREATE POLICY "Users view own profile"
+    ON public.profiles FOR SELECT
+    USING (id = auth.uid() OR public.is_owner());
 
 CREATE POLICY "Owner manage all profiles" 
     ON public.profiles FOR ALL 
@@ -84,7 +84,7 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.get_staff_auth(TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_staff_auth(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_staff_auth(TEXT) TO service_role;
 
 -- ========================================================
 -- 3. KATALOG & SUPPLIER
@@ -181,9 +181,9 @@ CREATE POLICY "Staff insert daily closings"
     ON public.daily_closings FOR INSERT 
     WITH CHECK (auth.role() = 'authenticated' AND staff_id = auth.uid());
 
-CREATE POLICY "Authenticated view daily closings" 
-    ON public.daily_closings FOR SELECT 
-    USING (auth.role() = 'authenticated');
+CREATE POLICY "Users view own daily closings"
+    ON public.daily_closings FOR SELECT
+    USING (staff_id = auth.uid() OR public.is_owner());
 
 CREATE POLICY "Owner update daily closings" 
     ON public.daily_closings FOR UPDATE 
@@ -202,13 +202,27 @@ CREATE TABLE IF NOT EXISTS public.daily_closing_items (
 
 ALTER TABLE public.daily_closing_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Staff insert closing items" 
-    ON public.daily_closing_items FOR INSERT 
-    WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Staff insert own closing items"
+    ON public.daily_closing_items FOR INSERT
+    WITH CHECK (
+      EXISTS (
+        SELECT 1 FROM public.daily_closings c
+        WHERE c.id = closing_id
+          AND c.staff_id = auth.uid()
+          AND c.status = 'submitted'
+      )
+    );
 
-CREATE POLICY "Authenticated view closing items" 
-    ON public.daily_closing_items FOR SELECT 
-    USING (auth.role() = 'authenticated');
+CREATE POLICY "Users view own closing items"
+    ON public.daily_closing_items FOR SELECT
+    USING (
+      public.is_owner()
+      OR EXISTS (
+        SELECT 1 FROM public.daily_closings c
+        WHERE c.id = closing_id
+          AND c.staff_id = auth.uid()
+      )
+    );
 
 CREATE POLICY "Owner update closing items" 
     ON public.daily_closing_items FOR UPDATE 
@@ -254,7 +268,11 @@ CREATE TABLE IF NOT EXISTS public.audit_request_edits (
     target_table TEXT NOT NULL,
     target_id UUID NOT NULL,
     reason TEXT NOT NULL,
+    changes JSONB NOT NULL DEFAULT '{}'::jsonb,
     status TEXT DEFAULT 'PENDING' NOT NULL CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    approved_by UUID REFERENCES public.profiles(id),
+    approved_at TIMESTAMPTZ,
+    notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 

@@ -27,7 +27,7 @@ export async function getRestocks(): Promise<Restock[]> {
   if (error) throw new Error(error.message);
   
   // Transform nested data to flat structure
-  return (data ?? []).map((r: any) => ({
+  return (data ?? []).map((r) => ({
     id: r.id,
     item_id: r.item_id,
     item_name: r.master_items?.name ?? "Unknown",

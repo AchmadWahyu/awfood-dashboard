@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, startTransition } from "react";
 import { submitClosing } from "./actions";
 import type { Supplier, Item, ClosingItem, ClosingRecord, ClosingSummaryItem } from "./actions";
 import { todayJakarta } from "@/lib/utils/date";
@@ -38,9 +38,8 @@ export default function EmployeePenutupanClient({
   existingClosingDetail: { closing: ClosingRecord; items: ClosingSummaryItem[] } | null;
 }) {
   const isSubmitted = !!existingClosing;
-  const [closingDate, setClosingDate] = useState(todayJakarta());
+  const closingDate = todayJakarta();
   const [cashPhysical, setCashPhysical] = useState("");
-  const [submittedAt, setSubmittedAt] = useState(existingClosing?.created_at || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -81,16 +80,18 @@ export default function EmployeePenutupanClient({
 
   const LS_KEY = `awfood-penutupan-draft-${closingDate}`;
 
-  // Load draft dari localStorage saat mount (hanya jika belum submit)
+  // Restore the saved draft as a non-urgent update when the form first mounts.
   useEffect(() => {
     if (isSubmitted) return;
     try {
       const raw = localStorage.getItem(LS_KEY);
       if (raw) {
         const draft = JSON.parse(raw);
-        if (draft.supplierInputs) setSupplierInputs(draft.supplierInputs);
-        if (draft.beverageInputs) setBeverageInputs(draft.beverageInputs);
-        if (draft.cashPhysical !== undefined) setCashPhysical(draft.cashPhysical);
+        startTransition(() => {
+          if (draft.supplierInputs) setSupplierInputs(draft.supplierInputs);
+          if (draft.beverageInputs) setBeverageInputs(draft.beverageInputs);
+          if (draft.cashPhysical !== undefined) setCashPhysical(draft.cashPhysical);
+        });
       }
     } catch {
       // ignore corrupted draft
@@ -163,15 +164,17 @@ export default function EmployeePenutupanClient({
     return Math.max(0, (awal || 0) - (akhir || 0));
   };
 
-  const calcSupplierTotal = (entries: any[]) => {
+  type StockEntry = { openingStock: number; endingStock: number; unitPrice: number };
+
+  const calcSupplierTotal = useCallback((entries: StockEntry[]) => {
     return entries.reduce((sum, e) => sum + calcTerjual(e.openingStock, e.endingStock) * e.unitPrice, 0);
-  };
+  }, []);
 
   const grandTotal = useMemo(() => {
     const supTotal = supplierInputs.reduce((sum, si) => sum + calcSupplierTotal(si.entries), 0);
     const bevTotal = beverageInputs.reduce((sum, e) => sum + calcTerjual(e.openingStock, e.endingStock) * e.unitPrice, 0);
     return supTotal + bevTotal;
-  }, [supplierInputs, beverageInputs]);
+  }, [supplierInputs, beverageInputs, calcSupplierTotal]);
 
   const handleOpenConfirm = () => {
     if (isSubmitted) return;
@@ -214,12 +217,11 @@ export default function EmployeePenutupanClient({
     formData.append("items", JSON.stringify(items));
 
     try {
-      const result = await submitClosing(formData);
+      await submitClosing(formData);
       toast.success("Closing berhasil disimpan.");
-      setSubmittedAt(new Date().toISOString());
       localStorage.removeItem(LS_KEY);
-    } catch (err: any) {
-      const msg = err.message || "Gagal menyimpan closing. Coba lagi.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menyimpan closing. Coba lagi.";
       setError(msg);
       toast.error(msg);
       console.error(err);
@@ -320,9 +322,9 @@ export default function EmployeePenutupanClient({
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-marker/40" />
                 <span className="text-base font-bold text-ink">{si.supplierName}</span>
-                {si.entries.filter((e: any) => (e.openingStock || 0) > 0).length > 0 && (
+                {si.entries.filter((e) => (e.openingStock || 0) > 0).length > 0 && (
                   <span className="text-xs text-ink-light bg-ruled/20 rounded-full px-2.5 py-0.5">
-                    {si.entries.filter((e: any) => (e.openingStock || 0) > 0).length} produk
+                    {si.entries.filter((e) => (e.openingStock || 0) > 0).length} produk
                   </span>
                 )}
               </div>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import bcrypt from "bcryptjs";
 
 export type StaffLoginState =
@@ -125,7 +126,10 @@ export async function staffLogin(
 
   const supabase = await createClient();
 
-  const { data: staffRows, error: staffError } = await supabase
+  // PIN lookup uses the server-only service role because the public anon role
+  // must not receive pin_hash or auth_token through the RPC.
+  const admin = createAdminClient();
+  const { data: staffRows, error: staffError } = await admin
     .rpc('get_staff_auth', { staff_code_input: staffCode });
 
   if (staffError || !staffRows || staffRows.length === 0) {

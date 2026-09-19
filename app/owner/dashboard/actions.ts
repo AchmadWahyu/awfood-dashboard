@@ -44,6 +44,7 @@ export async function getDashboardData(date?: string): Promise<DashboardData> {
   const { data: openDiscrepancies } = await supabase
     .from("daily_closings")
     .select("cash_discrepancy")
+    .eq("status", "verified")
     .eq("discrepancy_status", "open");
 
   const openDiscrepancyCount = (openDiscrepancies || []).filter(
@@ -67,6 +68,7 @@ export async function getDashboardData(date?: string): Promise<DashboardData> {
   const { data: trend7Data } = await supabase
     .from("daily_closings")
     .select("closing_date, total_system_omzet")
+    .eq("status", "verified")
     .gte("closing_date", start7)
     .lte("closing_date", today)
     .order("closing_date", { ascending: true });
@@ -82,6 +84,7 @@ export async function getDashboardData(date?: string): Promise<DashboardData> {
   const { data: trend30Data } = await supabase
     .from("daily_closings")
     .select("closing_date, total_system_omzet")
+    .eq("status", "verified")
     .gte("closing_date", start30)
     .lte("closing_date", today)
     .order("closing_date", { ascending: true });
@@ -96,6 +99,7 @@ export async function getDashboardData(date?: string): Promise<DashboardData> {
   const { data: last30ClosingIds } = await supabase
     .from("daily_closings")
     .select("id")
+    .eq("status", "verified")
     .gte("closing_date", start30)
     .lte("closing_date", today);
 

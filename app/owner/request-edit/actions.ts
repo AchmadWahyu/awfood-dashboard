@@ -2,8 +2,54 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { RequestEdit, DailyClosing, ClosingItem, Item, Supplier } from "@/lib/dummy/types";
+import type { RequestEdit, DailyClosing, ClosingItem } from "@/lib/dummy/types";
 import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
+
+type RequestEditItemPayload = Partial<ClosingItem> & {
+  initial_stock?: number;
+  remaining_stock?: number;
+  sold_quantity?: number;
+};
+
+type RequestEditChanges = {
+  items: RequestEditItemPayload[];
+  cash_physical: number | null;
+};
+
+function parseChanges(changes: unknown): RequestEditChanges {
+  const parsed = typeof changes === "string" ? JSON.parse(changes) : changes;
+  if (Array.isArray(parsed)) {
+    return { items: parsed, cash_physical: null };
+  }
+  if (!parsed || typeof parsed !== "object") {
+    return { items: [], cash_physical: null };
+  }
+
+  const value = parsed as { items?: unknown; cash_physical?: unknown };
+  return {
+    items: Array.isArray(value.items) ? value.items as RequestEditItemPayload[] : [],
+    cash_physical: typeof value.cash_physical === "number" ? value.cash_physical : null,
+  };
+}
+
+function mapRequestItems(
+  items: RequestEditItemPayload[],
+  prices: Map<string, number>,
+): ClosingItem[] {
+  return items.map((item, index) => {
+    const opening = Number(item.stok_awal ?? item.initial_stock ?? 0);
+    const ending = Number(item.stok_akhir ?? item.remaining_stock ?? 0);
+    const sold = Number(item.terjual ?? item.sold_quantity ?? Math.max(0, opening - ending));
+    return {
+      id: String(item.id || `item-${index}`),
+      item_id: String(item.item_id || ""),
+      stok_awal: opening,
+      stok_akhir: ending,
+      terjual: sold,
+      total_rp: sold * (prices.get(String(item.item_id || "")) || 0),
+    };
+  });
+}
 
 export async function getAllRequestEdits(): Promise<RequestEdit[]> {
   const supabase = await createClient();
@@ -18,17 +64,13 @@ export async function getAllRequestEdits(): Promise<RequestEdit[]> {
     return [];
   }
 
-  const [items, suppliers] = await Promise.all([
-    getItems(),
-    getSuppliers(),
-  ]);
+  const items = await getItems();
 
-  const itemsMap = new Map(items.map((i) => [i.id, i]));
-  const suppliersMap = new Map(suppliers.map((s) => [s.id, s]));
+  const prices = new Map(items.map((i) => [i.id, Number(i.price_sell)]));
 
   return (requestEdits || []).map((re) => {
-    const itemsData = typeof re.changes === 'string' ? JSON.parse(re.changes) : re.changes;
-    const parsedItems: ClosingItem[] = Array.isArray(itemsData) ? itemsData : [];
+    const changes = parseChanges(re.changes);
+    const parsedItems = mapRequestItems(changes.items, prices);
     
     return {
       id: re.id,
@@ -39,16 +81,9 @@ export async function getAllRequestEdits(): Promise<RequestEdit[]> {
       requested_at: re.created_at,
       approved_by: null,
       approved_at: null,
-      items: parsedItems.map((item: any, idx: number) => ({
-        id: item.id || `item-${idx}`,
-        item_id: item.item_id,
-        stok_awal: item.initial_stock || 0,
-        stok_akhir: item.remaining_stock || 0,
-        terjual: item.sold_quantity || 0,
-        total_rp: 0,
-      })),
-      cash_initial: 0,
-      cash_physical: 0,
+       items: parsedItems,
+       cash_initial: 0,
+       cash_physical: changes.cash_physical || 0,
     };
   });
 }
@@ -89,10 +124,9 @@ export async function getRequestEditDetail(requestEditId: string) {
   ]);
 
   const itemsMap = new Map(items.map((i) => [i.id, i]));
-  const suppliersMap = new Map(suppliers.map((s) => [s.id, s]));
-
-  const itemsData = typeof requestEdit.changes === 'string' ? JSON.parse(requestEdit.changes) : requestEdit.changes;
-  const parsedItems: ClosingItem[] = Array.isArray(itemsData) ? itemsData : [];
+  const changes = parseChanges(requestEdit.changes);
+  const prices = new Map(items.map((i) => [i.id, Number(i.price_sell)]));
+  const parsedItems = mapRequestItems(changes.items, prices);
 
   const closingDetail: DailyClosing | null = closing ? {
     id: closing.id,
@@ -141,16 +175,9 @@ export async function getRequestEditDetail(requestEditId: string) {
       requested_at: requestEdit.created_at,
       approved_by: null,
       approved_at: null,
-      items: parsedItems.map((item: any, idx: number) => ({
-        id: item.id || `item-${idx}`,
-        item_id: item.item_id,
-        stok_awal: item.initial_stock || 0,
-        stok_akhir: item.remaining_stock || 0,
-        terjual: item.sold_quantity || 0,
-        total_rp: 0,
-      })),
-      cash_initial: 0,
-      cash_physical: 0,
+       items: parsedItems,
+       cash_initial: 0,
+       cash_physical: changes.cash_physical || 0,
     },
     closing: closingDetail,
     items,
@@ -163,47 +190,11 @@ export async function approveRequestEdit(requestEditId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data: requestEdit, error: fetchError } = await supabase
-    .from("audit_request_edits")
-    .select("*")
-    .eq("id", requestEditId)
-    .single();
+  const { error } = await supabase.rpc("approve_request_edit", {
+    request_edit_id: requestEditId,
+  });
 
-  if (fetchError || !requestEdit) throw new Error("Request edit tidak ditemukan");
-
-  const { error: updateError } = await supabase
-    .from("audit_request_edits")
-    .update({
-      status: "APPROVED",
-      approved_by: user.id,
-      approved_at: new Date().toISOString(),
-    })
-    .eq("id", requestEditId);
-
-  if (updateError) throw new Error(updateError.message);
-
-  const { data: masterItems } = await supabase
-    .from("master_items")
-    .select("id, selling_price");
-
-  const itemsMap = new Map((masterItems || []).map((i) => [i.id, Number(i.selling_price)]));
-
-  const itemsData = typeof requestEdit.changes === 'string' ? JSON.parse(requestEdit.changes) : requestEdit.changes;
-  const newTotalOmzet = Array.isArray(itemsData) 
-    ? itemsData.reduce((sum: number, item: any) => sum + ((item.sold_quantity || 0) * (itemsMap.get(item.item_id) || 0)), 0)
-    : 0;
-
-  const { error: closingError } = await supabase
-    .from("daily_closings")
-    .update({
-      total_system_omzet: newTotalOmzet,
-      cash_physical: itemsData.cash_physical || 0,
-    })
-    .eq("id", requestEdit.target_id);
-
-  if (closingError) {
-    console.error("Error updating closing:", closingError);
-  }
+  if (error) throw new Error(error.message);
 
   revalidatePath("/owner/request-edit");
   revalidatePath("/employee/riwayat");

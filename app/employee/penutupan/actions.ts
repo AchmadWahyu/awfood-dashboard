@@ -205,7 +205,7 @@ export async function submitClosing(formData: FormData) {
   const items: ClosingItem[] = JSON.parse(itemsJson);
 
   // Check if closing already exists for this date
-  const { data: existingClosing, error: existingError } = await supabase
+  const { data: existingClosing } = await supabase
     .from("daily_closings")
     .select("id, status")
     .eq("closing_date", date)

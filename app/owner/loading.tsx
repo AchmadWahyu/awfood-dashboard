@@ -1,7 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
-  return (
+const Loading = () => (
     <div className="p-6 space-y-6">
       <Skeleton className="h-7 w-48" />
       <div className="space-y-3">
@@ -10,5 +9,6 @@ export default function Loading() {
         <Skeleton className="h-20 w-full" />
       </div>
     </div>
-  );
-}
+);
+
+export default Loading;

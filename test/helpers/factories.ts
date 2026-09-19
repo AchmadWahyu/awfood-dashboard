@@ -1,7 +1,92 @@
 // Factory functions for test data
 // Usage: const supplier = makeSupplier({ name: "Bakery ABC" });
 
-export function makeProfile(overrides: Partial<any> = {}) {
+type ProfileFixture = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "OWNER" | "STAFF";
+  staff_code: string;
+  pin_hash: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type SupplierFixture = {
+  id: string;
+  name: string;
+  phone_number: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type ItemFixture = {
+  id: string;
+  supplier_id: string | null;
+  name: string;
+  category: "KONSINYASI_KUE" | "MINUMAN_OWNER" | "AYAM_PENYET";
+  cost_price: number;
+  selling_price: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type DailyClosingFixture = {
+  id: string;
+  date: string;
+  staff_id: string;
+  status: "submitted" | "verified" | "rejected";
+  cash_initial: number;
+  cash_physical: number;
+  qris_verified: number | null;
+  qris_verified_by: string | null;
+  qris_verified_at: string | null;
+  discrepancy: number | null;
+  discrepancy_status: string | null;
+  discrepancy_resolution: string | null;
+  discrepancy_note: string | null;
+  verified_by: string | null;
+  verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type DailyClosingItemFixture = {
+  id: string;
+  closing_id: string;
+  item_id: string;
+  opening_stock: number;
+  ending_stock: number;
+  sold: number;
+  unit_price: number;
+  total: number;
+  created_at: string;
+};
+
+type RestockFixture = {
+  id: string;
+  item_id: string;
+  qty: number;
+  date: string;
+  created_at: string;
+};
+
+type ExpenseFixture = {
+  id: string;
+  category: string;
+  custom_label: string | null;
+  amount: number;
+  pocket: "CASH_LACI" | "QRIS_AWFOOD";
+  date: string;
+  note: string | null;
+  created_by: string;
+  created_at: string;
+};
+
+export function makeProfile(overrides: Partial<ProfileFixture> = {}) {
   return {
     id: cryptoRandomId(),
     email: `user-${randInt()}@test.id`,
@@ -16,7 +101,7 @@ export function makeProfile(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeSupplier(overrides: Partial<any> = {}) {
+export function makeSupplier(overrides: Partial<SupplierFixture> = {}) {
   return {
     id: cryptoRandomId(),
     name: `Supplier ${randInt()}`,
@@ -28,7 +113,7 @@ export function makeSupplier(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeItem(overrides: Partial<any> = {}) {
+export function makeItem(overrides: Partial<ItemFixture> = {}) {
   return {
     id: cryptoRandomId(),
     supplier_id: null,
@@ -43,7 +128,7 @@ export function makeItem(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeDailyClosing(overrides: Partial<any> = {}) {
+export function makeDailyClosing(overrides: Partial<DailyClosingFixture> = {}) {
   return {
     id: cryptoRandomId(),
     date: isoDate(),
@@ -66,7 +151,7 @@ export function makeDailyClosing(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeDailyClosingItem(overrides: Partial<any> = {}) {
+export function makeDailyClosingItem(overrides: Partial<DailyClosingItemFixture> = {}) {
   return {
     id: cryptoRandomId(),
     closing_id: cryptoRandomId(),
@@ -81,7 +166,7 @@ export function makeDailyClosingItem(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeRestock(overrides: Partial<any> = {}) {
+export function makeRestock(overrides: Partial<RestockFixture> = {}) {
   return {
     id: cryptoRandomId(),
     item_id: cryptoRandomId(),
@@ -92,7 +177,7 @@ export function makeRestock(overrides: Partial<any> = {}) {
   };
 }
 
-export function makeExpense(overrides: Partial<any> = {}) {
+export function makeExpense(overrides: Partial<ExpenseFixture> = {}) {
   return {
     id: cryptoRandomId(),
     category: "BAHAN_MINUMAN",

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { createItem, updateItem, toggleItemActive, deleteItem, getItems, getBeverageItems } from "./actions";
+import { createItem, updateItem, toggleItemActive, deleteItem, getItems } from "./actions";
 import type { Item, ItemType } from "./actions";
 import { formatNumber } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
@@ -94,8 +94,8 @@ export default function OwnerItemsClient({
       toast.success("Item berhasil ditambahkan.");
       setAddForm({ name: "", supplier_id: "", type: "KONSINYASI_KUE", cost_price: "", selling_price: "" });
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menambah item.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menambah item.");
     }
   };
 
@@ -131,8 +131,8 @@ export default function OwnerItemsClient({
       toast.success("Item berhasil diperbarui.");
       closeEdit();
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memperbarui item.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memperbarui item.");
     }
   };
 
@@ -141,8 +141,8 @@ export default function OwnerItemsClient({
       await toggleItemActive(id, !is_active);
       toast.success("Status item diperbarui.");
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal memperbarui status item.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal memperbarui status item.");
     }
   };
 
@@ -158,8 +158,8 @@ export default function OwnerItemsClient({
       await deleteItem(confirmId);
       toast.success("Item berhasil dihapus.");
       await refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus item.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus item.");
     } finally {
       setConfirmId(null);
     }

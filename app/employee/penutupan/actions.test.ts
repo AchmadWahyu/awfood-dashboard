@@ -31,7 +31,7 @@ describe("submitClosing", () => {
     mockClient.auth.getUser = () =>
       Promise.resolve({ data: { user: { id: mockUser.id } }, error: null });
 
-    vi.mocked(createClient).mockResolvedValue(mockClient as any);
+    vi.mocked(createClient).mockResolvedValue(mockClient as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const formData = new FormData();
     formData.append("date", "2026-09-06");
@@ -71,7 +71,7 @@ describe("submitClosing", () => {
     mockClient.auth.getUser = () =>
       Promise.resolve({ data: { user: null }, error: null });
 
-    vi.mocked(createClient).mockResolvedValue(mockClient as any);
+    vi.mocked(createClient).mockResolvedValue(mockClient as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const formData = new FormData();
     formData.append("date", "2026-09-06");
@@ -93,7 +93,7 @@ describe("submitClosing", () => {
     mockClient.auth.getUser = () =>
       Promise.resolve({ data: { user: { id: mockUser.id } }, error: null });
 
-    vi.mocked(createClient).mockResolvedValue(mockClient as any);
+    vi.mocked(createClient).mockResolvedValue(mockClient as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const formData = new FormData();
     formData.append("date", "2026-09-06");
@@ -118,7 +118,7 @@ describe("submitClosing", () => {
     mockClient.auth.getUser = () =>
       Promise.resolve({ data: { user: { id: mockUser.id } }, error: null });
 
-    vi.mocked(createClient).mockResolvedValue(mockClient as any);
+    vi.mocked(createClient).mockResolvedValue(mockClient as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const formData = new FormData();
     formData.append("date", "2026-09-06");

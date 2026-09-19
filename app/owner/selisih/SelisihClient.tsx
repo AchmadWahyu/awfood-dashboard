@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect, useCallback, startTransition } from "react";
 import { toast } from "sonner";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getClosingsWithDiscrepancy, getClosingDetail, resolveDiscrepancy, addDeduction } from "./actions";
-import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
 import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -55,7 +53,6 @@ export default function SelisihClient({
   const [openSupplierId, setOpenSupplierId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const loadClosingDetail = async (id: string) => {
     setIsLoading(true);
@@ -71,11 +68,14 @@ export default function SelisihClient({
     }
   };
 
+  // Load discrepancy detail or clear stale detail state after selection changes.
   useEffect(() => {
     if (selectedId) {
-      loadClosingDetail(selectedId);
+      startTransition(() => {
+        void loadClosingDetail(selectedId);
+      });
     } else {
-      setSelected(null);
+      startTransition(() => setSelected(null));
     }
   }, [selectedId]);
 
@@ -154,7 +154,10 @@ export default function SelisihClient({
     };
   }, [selected]);
 
-  useEffect(() => { setOpenSupplierId(null); }, [selectedId]);
+  // Reset the supplier accordion when the selected closing changes.
+  useEffect(() => {
+    startTransition(() => setOpenSupplierId(null));
+  }, [selectedId]);
 
   const handleResolve = async (closingId: string) => {
     const c = closings.find((x) => x.id === closingId);
@@ -180,8 +183,8 @@ export default function SelisihClient({
       setNote("");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menyelesaikan investigasi.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menyelesaikan investigasi.");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -440,7 +443,7 @@ export default function SelisihClient({
                 <p className="text-xs font-bold text-ink">Tindak Lanjut</p>
                 {resolveId === selected.id ? (
                   <div className="space-y-2">
-                    <select value={resolution} onChange={(e) => setResolution(e.target.value as any)} className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker">
+                    <select value={resolution} onChange={(e) => setResolution(e.target.value as typeof resolution)} className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker">
                       <option value="koreksi data">Koreksi Data</option>
                       <option value="ditanggung usaha">Ditanggung Usaha</option>
                       <option value="ditanggung karyawan">Ditanggung Karyawan</option>

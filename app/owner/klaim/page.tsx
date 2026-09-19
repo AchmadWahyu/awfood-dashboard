@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { useSyncStorage } from "@/lib/dummy/sync";
 import { getClaims, updateClaim, getItems } from "@/lib/dummy/api";
 import type { Claim } from "@/lib/dummy/types";
@@ -16,10 +16,12 @@ export default function OwnerKlaimPage() {
   const [version, setVersion] = useState(0);
   useSyncStorage(() => setVersion((v) => v + 1));
   const [claims, setClaims] = useState<Claim[]>(() => getClaims().sort((a, b) => +new Date(b.requested_at) - +new Date(a.requested_at)));
-  const items = useMemo(() => getItems(), [version]);
+  const items = getItems();
   const refresh = () => setClaims(getClaims().sort((a, b) => +new Date(b.requested_at) - +new Date(a.requested_at)));
 
-  useEffect(() => { refresh(); }, [version]);
+  useEffect(() => {
+    startTransition(refresh);
+  }, [version]);
 
   const handle = (id: string, status: "approved" | "rejected") => {
     updateClaim(id, { status, approved_by: "owner-1", approved_at: new Date().toISOString() });

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useCallback, useEffect, startTransition } from "react";
 import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
-import { getClosingsByStaff, getClosingDetail } from "./actions";
+import { getClosingDetail } from "./actions";
 import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -54,7 +53,6 @@ export default function EmployeeRiwayatClient({
   const [openSupplierId, setOpenSupplierId] = useState<string | null>(null);
   const [showInfo, setShowInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const selected = useMemo(() => {
     if (!selectedId) return null;
@@ -77,11 +75,14 @@ export default function EmployeeRiwayatClient({
     }
   }, []);
 
+  // Load the selected closing detail as a non-urgent update while keeping the list responsive.
   useEffect(() => {
     if (selectedId) {
-      loadClosingDetail(selectedId);
+      startTransition(() => {
+        void loadClosingDetail(selectedId);
+      });
     }
-  }, [selectedId]);
+  }, [selectedId, loadClosingDetail]);
 
   const supplierGroups = useMemo<SupplierGroup[]>(() => {
     if (!selected) return [];
@@ -109,7 +110,10 @@ export default function EmployeeRiwayatClient({
 
   const closeDetail = useCallback(() => setSelectedId(null), []);
 
-  useEffect(() => { setOpenSupplierId(null); }, [selectedId]);
+  // Reset the supplier accordion when the selected closing changes.
+  useEffect(() => {
+    startTransition(() => setOpenSupplierId(null));
+  }, [selectedId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

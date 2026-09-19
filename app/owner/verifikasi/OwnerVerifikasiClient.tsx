@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useCallback, useEffect, startTransition } from "react";
 import { toast } from "sonner";
-import type { DailyClosing, Item, Supplier, Expense } from "@/lib/dummy/types";
+import type { DailyClosing, Item, Supplier } from "@/lib/dummy/types";
 import { getSubmittedClosings, getClosingDetail, verifyClosing, rejectClosing } from "./actions";
-import { getItems, getSuppliers } from "@/app/employee/riwayat/actions";
-import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
+import { formatRp, formatDateDisplay } from "@/lib/utils/format";
 import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 interface SupplierGroup {
@@ -37,7 +35,6 @@ export default function OwnerVerifikasiClient({
   const [rejectReason, setRejectReason] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const loadClosingDetail = async (id: string) => {
     setIsLoading(true);
@@ -53,9 +50,12 @@ export default function OwnerVerifikasiClient({
     }
   };
 
+  // Load verification detail as a non-urgent update after selecting a closing.
   useEffect(() => {
     if (selectedId) {
-      loadClosingDetail(selectedId);
+      startTransition(() => {
+        void loadClosingDetail(selectedId);
+      });
     }
   }, [selectedId]);
 
@@ -124,7 +124,10 @@ export default function OwnerVerifikasiClient({
     setShowRejectModal(false);
   }, []);
 
-  useEffect(() => { setOpenSupplierId(null); }, [selectedId]);
+  // Reset the supplier accordion when the selected closing changes.
+  useEffect(() => {
+    startTransition(() => setOpenSupplierId(null));
+  }, [selectedId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -161,8 +164,8 @@ export default function OwnerVerifikasiClient({
       toast.success("Closing berhasil diverifikasi.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal verifikasi closing.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal verifikasi closing.");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -180,8 +183,8 @@ export default function OwnerVerifikasiClient({
       toast.success("Closing berhasil ditolak.");
       await refresh();
       closeDetail();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menolak closing.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menolak closing.");
       console.error(err);
     } finally {
       setIsSubmitting(false);

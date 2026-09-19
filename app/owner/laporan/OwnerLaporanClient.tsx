@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, startTransition } from "react";
 import type { DailyClosing, Item, Supplier, Expense, EmployeeDeduction } from "@/lib/dummy/types";
 import { formatRp, formatDateDisplay, formatDateTime } from "@/lib/utils/format";
 import { getSalesReport, getDiscrepancyReport, getExpensesReport, getDeductionsReport } from "./actions";
@@ -79,9 +79,10 @@ export default function OwnerLaporanClient() {
   }, []);
 
   // Fetch reports when dates change
+  // Refresh report data without blocking the current view.
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    startTransition(() => setLoading(true));
     Promise.all([
       getSalesReport(startDate, endDate),
       getDiscrepancyReport(startDate, endDate),
@@ -93,16 +94,17 @@ export default function OwnerLaporanClient() {
         setDiscrepancies(d);
         setExpenses(e);
         setDeductions(ded);
-        setLoading(false);
+       startTransition(() => setLoading(false));
       }
     });
     return () => { cancelled = true; };
   }, [startDate, endDate]);
 
   // Fetch selected closing detail
+  // Clear stale detail data when no closing is selected.
   useEffect(() => {
     if (!selectedId) {
-      setSelected(null);
+      startTransition(() => setSelected(null));
       return;
     }
     getClosingDetail(selectedId).then((detail) => {
@@ -153,7 +155,10 @@ export default function OwnerLaporanClient() {
     syncUrl(null);
   }, [syncUrl]);
 
-  useEffect(() => { setOpenSupplierId(null); }, [selectedId]);
+  // Reset the supplier accordion when the selected closing changes.
+  useEffect(() => {
+    startTransition(() => setOpenSupplierId(null));
+  }, [selectedId]);
 
   useEffect(() => {
     const onPop = () => {
