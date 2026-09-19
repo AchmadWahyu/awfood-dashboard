@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "awfood-dashboard-staging",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "dist/server/index.js",
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
+  },
+  "cache": {
+    "enabled": false
+  },
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://uvmjsiretemxtcvkrxnw.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bWpzaXJldGVteHRjdmtyeG53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1NTg3MTAsImV4cCI6MjEwNDEzNDcxMH0.NNVNYisIxr1Y_0Bxa0wIihxGmkHSNzYWPqsle1z0iEg"
+  }
+}
