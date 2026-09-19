@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -39,3 +41,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent / tool artifacts
+.chat-session.md
+.codex/
+.dev/
+.impeccable/
+.kilo/
+.scratch/
+
+# seed scripts with credentials
+scripts/seed.mjs
+scripts/seed-staging.mjs
+scripts/rotate-credentials.mjs
+
+# data & logs
+docs/data.json
+*.log
+*.err
+/dist/
+.vinext/
+.wrangler/

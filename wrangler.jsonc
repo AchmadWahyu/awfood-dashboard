@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "awfood-dashboard",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "main": "vinext/server/fetch-handler",
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
+  },
+  "cache": {
+    "enabled": false
+  },
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://rgussbbwygytyxqcthbn.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJndXNzYmJ3eWd5dHl4cWN0aGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0OTE2MjIsImV4cCI6MjEwMTA2NzYyMn0.9ukBJmviygeUZ-XhwYeF9pQaQmINQnmU3zaVljKmY4U"
+  }
+}
