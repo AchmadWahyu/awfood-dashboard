@@ -35,7 +35,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --config wrangler.jsonc
+          command: deploy --config dist/server/wrangler.json
 
       - name: Deploy Staging (PR / other branches)
         if: github.ref != 'refs/heads/main'
