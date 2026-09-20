@@ -10,7 +10,7 @@ import FormattedNumberInput from "@/components/FormattedNumberInput";
 
 function StockInput({ value, onChange, label, readOnly }: { value: number; onChange: (v: number) => void; label: string; readOnly?: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-1 grow">
+    <div className="flex flex-col items-center gap-1 grow text-center">
       <label className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">{label}</label>
       <input
         type="number"
@@ -18,7 +18,7 @@ function StockInput({ value, onChange, label, readOnly }: { value: number; onCha
         value={value || ""}
         onChange={(e) => onChange(Math.max(0, parseInt(e.target.value) || 0))}
         disabled={readOnly}
-        className="w-28 rounded-lg border border-ruled bg-paper-light py-2 text-center text-sm font-semibold text-ink outline-none focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full rounded-lg border border-ruled bg-paper-light py-2 text-center text-sm font-semibold text-ink outline-none focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       />
     </div>
   );
@@ -322,11 +322,6 @@ export default function EmployeePenutupanClient({
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-marker/40" />
                 <span className="text-base font-bold text-ink">{si.supplierName}</span>
-                {si.entries.filter((e) => (e.openingStock || 0) > 0).length > 0 && (
-                  <span className="text-xs text-ink-light bg-ruled/20 rounded-full px-2.5 py-0.5">
-                    {si.entries.filter((e) => (e.openingStock || 0) > 0).length} produk
-                  </span>
-                )}
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-marker">{formatRp(total)}</span>
@@ -365,7 +360,7 @@ export default function EmployeePenutupanClient({
                             onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "endingStock", v)}
                           />
                         </div>
-                        <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex flex-col items-center gap-0.5">
                           <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
                           <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
                         </div>
@@ -408,7 +403,7 @@ export default function EmployeePenutupanClient({
                     onChange={(v) => updateBeverageStok(entry.itemId, "endingStock", v)}
                   />
                 </div>
-                <div className="flex flex-col items-end gap-0.5">
+                <div className="flex flex-col items-end gap-0.5 text-center">
                   <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
                   <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
                   <span className={`text-xs font-semibold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</span>
