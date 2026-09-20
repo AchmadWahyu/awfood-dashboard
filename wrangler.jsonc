@@ -23,5 +23,21 @@
   "vars": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://rgussbbwygytyxqcthbn.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJndXNzYmJ3eWd5dHl4cWN0aGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0OTE2MjIsImV4cCI6MjEwMTA2NzYyMn0.9ukBJmviygeUZ-XhwYeF9pQaQmINQnmU3zaVljKmY4U"
+  },
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "redact_query_string": false,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    }
   }
 }
