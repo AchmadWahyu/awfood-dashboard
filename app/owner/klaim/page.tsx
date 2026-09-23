@@ -29,7 +29,7 @@ export default function OwnerKlaimPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Approval Klaim Barang</h2>
       {claims.length === 0 ? (
         <p className="text-sm text-ink-light">Belum ada klaim.</p>

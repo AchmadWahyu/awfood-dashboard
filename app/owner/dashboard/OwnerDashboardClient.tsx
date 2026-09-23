@@ -63,7 +63,7 @@ export default function OwnerDashboardClient({ initialData, initialDate }: Props
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Dashboard Overview</h2>
 
       {/* Date Picker */}
@@ -110,17 +110,17 @@ export default function OwnerDashboardClient({ initialData, initialDate }: Props
             <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
               <p className="text-xs text-ink-light">Omzet {dateLabel}</p>
               <p className="text-2xl font-bold text-marker">{formatRp(data.todayOmzet)}</p>
-              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+              <p className="text-xs text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
             </div>
             <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
               <p className="text-xs text-ink-light">Kas Fisik {dateLabel}</p>
               <p className="text-2xl font-bold text-ink">{formatRp(data.todayCash)}</p>
-              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+              <p className="text-xs text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
             </div>
             <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
               <p className="text-xs text-ink-light">QRIS {dateLabel}</p>
               <p className="text-2xl font-bold text-ink">{formatRp(data.todayQris)}</p>
-              <p className="text-[10px] text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
+              <p className="text-xs text-ink-light mt-1">Closing terverifikasi {dateLabel.toLowerCase()}</p>
             </div>
           </>
         )}
@@ -128,7 +128,7 @@ export default function OwnerDashboardClient({ initialData, initialDate }: Props
         <div className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm">
           <p className="text-xs text-ink-light">Selisih Terbuka</p>
           <p className="text-2xl font-bold text-marker">{data.openDiscrepancyCount}</p>
-          <p className="text-[10px] text-ink-light mt-1">Kasus butuh investigasi</p>
+          <p className="text-xs text-ink-light mt-1">Kasus butuh investigasi</p>
         </div>
       </div>
 
@@ -181,12 +181,12 @@ export default function OwnerDashboardClient({ initialData, initialDate }: Props
             <div className="space-y-3">
               {data.top5Last30.map((item, idx) => (
                 <div key={item.item_id} className="flex items-center gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-marker text-white text-[10px] font-bold">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-marker text-white text-xs font-bold">
                     {idx + 1}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-ink truncate" title={item.item_name}>{item.item_name}</p>
-                    <p className="text-[10px] text-ink-light">{formatRp(item.total)}</p>
+                    <p className="text-xs text-ink-light">{formatRp(item.total)}</p>
                   </div>
                   <span className="shrink-0 text-sm font-bold text-marker tabular-nums">{item.sold} pcs</span>
                 </div>

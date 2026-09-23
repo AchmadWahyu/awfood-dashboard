@@ -37,7 +37,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-marker text-white text-xs font-bold">A</div>
             <div>
               <h1 className="text-sm font-bold text-ink leading-tight">AW Food</h1>
-              <p className="text-[10px] text-marker leading-tight">Staff</p>
+              <p className="text-xs text-marker leading-tight">Staff</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
               <Link
                 key={n.href}
                 href={n.href}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
+                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
                   active ? "text-marker" : "text-ink-light"
                 }`}
               >

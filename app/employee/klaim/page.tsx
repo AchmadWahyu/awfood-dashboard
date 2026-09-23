@@ -53,9 +53,9 @@ export default function EmployeeKlaimPage() {
     .sort((a, b) => +new Date(b.requested_at) - +new Date(a.requested_at));
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 space-y-6">
+    <div className="mx-auto max-w-2xl px-4 py-4 sm:py-6 space-y-6">
       <h2 className="text-lg font-bold text-ink">Klaim Barang</h2>
-      <form onSubmit={handleSubmit} className=" rounded-2xl border border-notch-border bg-paper-light p-6 shadow-sm space-y-4">
+      <form onSubmit={handleSubmit} className=" rounded-2xl border border-notch-border bg-paper-light p-4 sm:p-6 shadow-sm space-y-4">
         {ok && <div className="rounded-lg bg-notch-success px-3 py-2 text-sm text-notch-success-text">Klaim berhasil diajukan!</div>}
         <div>
           <label className="block text-xs text-ink-light mb-1">Closing</label>
@@ -71,7 +71,7 @@ export default function EmployeeKlaimPage() {
             {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-ink-light mb-1">Jenis</label>
             <select value={type} onChange={(e) => setType(e.target.value as ClaimType)} className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker">

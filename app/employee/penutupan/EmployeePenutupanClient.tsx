@@ -11,14 +11,14 @@ import FormattedNumberInput from "@/components/FormattedNumberInput";
 function StockInput({ value, onChange, label, readOnly }: { value: number; onChange: (v: number) => void; label: string; readOnly?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1 grow text-center">
-      <label className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">{label}</label>
+      <label className="text-xs font-medium uppercase tracking-wider text-ink-light/60">{label}</label>
       <input
         type="number"
         min={0}
         value={value || ""}
         onChange={(e) => onChange(Math.max(0, parseInt(e.target.value) || 0))}
         disabled={readOnly}
-        className="w-full rounded-lg border border-ruled bg-paper-light py-2 text-center text-sm font-semibold text-ink outline-none focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="w-full rounded-lg border border-ruled bg-paper-light py-2.5 text-center text-sm font-semibold text-ink outline-none focus:border-marker disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       />
     </div>
   );
@@ -242,8 +242,8 @@ export default function EmployeePenutupanClient({
     }
 
     return (
-      <div className="mx-auto max-w-2xl py-12 px-4">
-        <div className="rounded-2xl bg-paper-light border border-notch-border p-8 text-center shadow-sm">
+      <div className="mx-auto max-w-2xl py-8 sm:py-12 px-4">
+        <div className="rounded-2xl bg-paper-light border border-notch-border p-6 sm:p-8 text-center shadow-sm">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-notch-success">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2d6b47" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
@@ -302,13 +302,13 @@ export default function EmployeePenutupanClient({
           className="w-full rounded-xl border-2 border-ruled bg-paper-light py-2.5 pl-4 pr-10 text-sm text-ink outline-none placeholder:text-ink-light/50 focus:border-marker transition-colors"
         />
         {searchQuery && (
-          <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-light hover:text-ink">✕</button>
+          <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-ink-light hover:text-ink">✕</button>
         )}
       </div>
 
       {/* Konsinyasi per supplier */}
       <div className="flex items-center gap-3 border-l-4 border-marker pl-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-marker/60">Konsinyasi Supplier</span>
+        <span className="text-xs font-bold uppercase tracking-wide text-marker/60">Konsinyasi Supplier</span>
       </div>
       {filteredSuppliers.map((si) => {
         const isOpen = safeOpenId === si.supplierId;
@@ -346,7 +346,7 @@ export default function EmployeePenutupanClient({
                         <p className="text-sm font-semibold text-ink truncate">{entry.itemName}</p>
                         <span className={`text-xs font-semibold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</span>
                       </div>
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3 grow">
                           <StockInput
                             label="Stok Awal"
@@ -360,8 +360,8 @@ export default function EmployeePenutupanClient({
                             onChange={(v) => updateSupplierStok(si.supplierId, entry.itemId, "endingStock", v)}
                           />
                         </div>
-                        <div className="flex flex-col items-center gap-0.5">
-                          <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
+                        <div className="flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-0.5">
+                          <span className="text-xs font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
                           <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
                         </div>
                       </div>
@@ -376,7 +376,7 @@ export default function EmployeePenutupanClient({
 
       {/* Minuman milik sendiri */}
       <div className="flex items-center gap-3 border-l-4 border-ink pl-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-ink-light/60">Minuman Milik Sendiri</span>
+        <span className="text-xs font-bold uppercase tracking-wide text-ink-light/60">Minuman Milik Sendiri</span>
       </div>
       <div className="rounded-2xl border border-notch-border bg-paper-light p-4 shadow-sm space-y-3">
         {beverageInputs.map((entry) => {
@@ -389,7 +389,7 @@ export default function EmployeePenutupanClient({
               className={`rounded-xl border p-4 transition-colors ${hasData ? "bg-marker-light/30 border-marker/20" : "border-ruled bg-paper-light"}`}
             >
               <p className="text-sm font-semibold text-ink mb-3">{entry.itemName}</p>
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <StockInput
                     label="Stok Awal"
@@ -403,8 +403,8 @@ export default function EmployeePenutupanClient({
                     onChange={(v) => updateBeverageStok(entry.itemId, "endingStock", v)}
                   />
                 </div>
-                <div className="flex flex-col items-end gap-0.5 text-center">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
+                <div className="flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-0.5 text-center">
+                  <span className="text-xs font-medium uppercase tracking-wider text-ink-light/60">Terjual</span>
                   <span className={`text-sm font-bold tabular-nums ${hasData ? "text-ink" : "text-ink-light"}`}>{terjual}</span>
                   <span className={`text-xs font-semibold tabular-nums ${hasData ? "text-marker" : "text-ink-light"}`}>{formatRp(totalRow)}</span>
                 </div>
@@ -425,14 +425,14 @@ export default function EmployeePenutupanClient({
               value={cashPhysical}
               onChange={setCashPhysical}
               placeholder="0"
-              className="w-48 rounded-xl border-2 border-ruled bg-transparent px-4 py-2.5 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
+              className="w-full sm:w-48 rounded-xl border-2 border-ruled bg-transparent px-4 py-2.5 text-lg font-bold text-ink outline-none focus:border-marker transition-colors"
             />
           </div>
         </div>
       </div>
 
       {/* Grand total & submit */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-marker-light/50 border border-marker/20 px-6 py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl bg-marker-light/50 border border-marker/20 px-4 sm:px-6 py-4">
         <div>
           <span className="text-xs text-ink-light">Total Omzet</span>
           <p className="text-xl font-bold text-marker tabular-nums">{formatRp(grandTotal)}</p>
@@ -457,7 +457,7 @@ export default function EmployeePenutupanClient({
             aria-modal="true"
             aria-label="Konfirmasi simpan penutupan"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl border border-notch-border bg-paper-light p-6 shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-notch-border bg-paper-light p-4 sm:p-6 shadow-xl"
           >
             <h3 className="text-base font-bold text-ink mb-2">
               Konfirmasi

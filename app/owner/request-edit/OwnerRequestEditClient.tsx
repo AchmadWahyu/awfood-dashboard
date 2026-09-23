@@ -162,7 +162,7 @@ export default function OwnerRequestEditClient({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Approval Request Edit</h2>
       {edits.length === 0 ? (
         <p className="text-sm text-ink-light">Belum ada request edit.</p>
@@ -241,7 +241,7 @@ export default function OwnerRequestEditClient({
                       className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-cream-card/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold" style={{ color: "#A0522D" }}>
+                        <span className="text-sm font-bold text-marker">
                           {g.supplier?.name || "Minuman Milik Sendiri"}
                         </span>
                         <span className="text-xs text-text-secondary">
@@ -258,7 +258,7 @@ export default function OwnerRequestEditClient({
                     {isOpen && (
                       <div className="border-t border-cream-border">
                         <div className="overflow-x-auto">
-                          <table className="aw-table min-w-[480px]">
+                          <table className="aw-table min-w-full">
                             <thead>
                               <tr>
                                 <th>ITEM</th>
@@ -273,7 +273,7 @@ export default function OwnerRequestEditClient({
                                 <tr key={i.id} className={i.changed ? "bg-marker-light/20" : ""}>
                                   <td className="font-medium">
                                     {i.item.name}
-                                    {i.changed && <span className="ml-2 rounded bg-marker-light px-1.5 py-0.5 text-[10px] font-bold text-marker">berubah</span>}
+                                    {i.changed && <span className="ml-2 rounded bg-marker-light px-1.5 py-0.5 text-xs font-bold text-marker">berubah</span>}
                                   </td>
                                   <td className={`text-center tabular-nums ${i.awalChanged ? "font-bold text-marker" : ""}`}>
                                     {i.stok_awal}
@@ -311,31 +311,31 @@ export default function OwnerRequestEditClient({
               return (
                 <div className="mt-3 space-y-2 text-sm">
                   <div className="rounded-lg bg-paper px-3 py-2">
-                    <p className="text-[10px] text-ink-light">Kas Awal</p>
+                    <p className="text-xs text-ink-light">Kas Awal</p>
                     <p className="font-semibold text-ink tabular-nums">{formatRp(selected.cash_initial)}</p>
                   </div>
 
                   {(kasChanged || omzetChanged) && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {kasChanged ? (
                         <div className="rounded-lg bg-paper px-3 py-2">
-                          <p className="text-[10px] text-ink-light">Kas Fisik Lama</p>
+                          <p className="text-xs text-ink-light">Kas Fisik Lama</p>
                           <p className="font-semibold text-ink-light tabular-nums line-through">{formatRp(oldCash)}</p>
                         </div>
                       ) : (
                         <div className="rounded-lg bg-paper px-3 py-2">
-                          <p className="text-[10px] text-ink-light">Kas Fisik</p>
+                          <p className="text-xs text-ink-light">Kas Fisik</p>
                           <p className="font-semibold text-ink tabular-nums">{formatRp(selected.cash_physical)}</p>
                         </div>
                       )}
                       {omzetChanged ? (
                         <div className="rounded-lg bg-paper px-3 py-2">
-                          <p className="text-[10px] text-ink-light">Omzet Lama</p>
+                          <p className="text-xs text-ink-light">Omzet Lama</p>
                           <p className="font-semibold text-ink-light tabular-nums line-through">{formatRp(oldOmzet)}</p>
                         </div>
                       ) : (
                         <div className="rounded-lg bg-paper px-3 py-2">
-                          <p className="text-[10px] text-ink-light">Omzet</p>
+                          <p className="text-xs text-ink-light">Omzet</p>
                           <p className="font-semibold text-ink tabular-nums">{formatRp(newOmzet)}</p>
                         </div>
                       )}
@@ -343,16 +343,16 @@ export default function OwnerRequestEditClient({
                   )}
 
                   {(kasChanged || omzetChanged) && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {kasChanged && (
                         <div className="rounded-lg bg-paper px-3 py-2 border border-marker">
-                          <p className="text-[10px] text-marker">Kas Fisik Baru</p>
+                          <p className="text-xs text-marker">Kas Fisik Baru</p>
                           <p className="font-semibold text-marker tabular-nums">{formatRp(selected.cash_physical)}</p>
                         </div>
                       )}
                       {omzetChanged && (
                         <div className="rounded-lg bg-paper px-3 py-2 border border-marker">
-                          <p className="text-[10px] text-marker">Omzet Baru</p>
+                          <p className="text-xs text-marker">Omzet Baru</p>
                           <p className="font-semibold text-marker tabular-nums">{formatRp(newOmzet)}</p>
                         </div>
                       )}
@@ -360,13 +360,13 @@ export default function OwnerRequestEditClient({
                   )}
 
                   {!kasChanged && !omzetChanged && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="rounded-lg bg-paper px-3 py-2">
-                        <p className="text-[10px] text-ink-light">Kas Fisik</p>
+                        <p className="text-xs text-ink-light">Kas Fisik</p>
                         <p className="font-semibold text-ink tabular-nums">{formatRp(selected.cash_physical)}</p>
                       </div>
                       <div className="rounded-lg bg-paper px-3 py-2">
-                        <p className="text-[10px] text-ink-light">Omzet</p>
+                        <p className="text-xs text-ink-light">Omzet</p>
                         <p className="font-semibold text-ink tabular-nums">{formatRp(newOmzet)}</p>
                       </div>
                     </div>

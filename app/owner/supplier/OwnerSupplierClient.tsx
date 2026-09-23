@@ -174,7 +174,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
   }, [editOpen, detailOpen, closeEdit, closeDetail]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Supplier</h2>
 
       {/* Search */}
@@ -226,7 +226,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
               onClick={() => openDetail(s)}
               className="w-full text-left rounded-xl border border-notch-border bg-paper-light p-4 hover:bg-paper transition-colors"
             >
-              <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
+               <p className="text-sm font-bold text-ink">{s.name} {s.is_active ? "" : <span className="text-xs text-ink-light">(nonaktif)</span>}</p>
               {s.phone_number && <p className="text-xs text-ink-light">{s.phone_number}</p>}
             </button>
           ))
@@ -288,7 +288,7 @@ export default function OwnerSupplierClient({ initialSuppliers }: { initialSuppl
                   <div key={item.id} className="rounded-xl border border-notch-border bg-paper-light p-3">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-ink">{item.name}</p>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${item.is_active ? "bg-notch-success text-notch-success-text" : "bg-ruled/30 text-ink-light"}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${item.is_active ? "bg-notch-success text-notch-success-text" : "bg-ruled/30 text-ink-light"}`}>
                         {item.is_active ? "Aktif" : "Nonaktif"}
                       </span>
                     </div>

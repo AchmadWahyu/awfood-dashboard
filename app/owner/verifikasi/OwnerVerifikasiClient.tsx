@@ -199,7 +199,7 @@ export default function OwnerVerifikasiClient({
     previewCalculation.qris >= 0;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="mx-auto max-w-3xl px-4 py-4 sm:py-6">
       <h2 className="mb-4 text-lg font-bold text-ink">Verifikasi Closing</h2>
 
       {closings.length === 0 ? (
@@ -281,10 +281,7 @@ export default function OwnerVerifikasiClient({
                       className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-cream-card/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span
-                          className="text-sm font-bold"
-                          style={{ color: "#A0522D" }}
-                        >
+                        <span className="text-sm font-bold text-marker">
                           {g.supplier?.name || "Minuman Milik Sendiri"}
                         </span>
                         <span className="text-xs text-text-secondary">
@@ -327,14 +324,14 @@ export default function OwnerVerifikasiClient({
                                 {formatRp(ci.total_rp)}
                               </span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-light">
-                              <div className="flex flex-col items-center gap-1 flex-2">
+                            <div className="grid grid-cols-3 gap-2 text-sm text-ink-light text-center">
+                              <div className="flex flex-col items-center gap-1">
                                 <p>Awal</p> <strong className="text-ink tabular-nums">{ci.stok_awal}</strong>
                               </div>
-                              <div className="flex flex-col items-center gap-1 flex-2">
+                              <div className="flex flex-col items-center gap-1">
                                 <p>Akhir</p> <strong className="text-ink tabular-nums">{ci.stok_akhir}</strong>
                               </div>
-                              <div className="flex flex-col items-center gap-1 flex-1">
+                              <div className="flex flex-col items-center gap-1">
                                 <p>Terjual</p> <strong className="text-ink tabular-nums text-notch-success-text">{ci.terjual}</strong>
                               </div>
                             </div>
@@ -405,7 +402,7 @@ export default function OwnerVerifikasiClient({
                       )}
                     </span>
                   </div>
-                  <p className="text-[10px] text-ink-light">
+                  <p className="text-xs text-ink-light">
                     {selected.expenses.length} item tercatat
                   </p>
                 </div>

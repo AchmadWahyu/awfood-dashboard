@@ -129,7 +129,7 @@ export default function PengeluaranClient({
   const dateLabel = selectedDate === todayJakarta() ? "Hari Ini" : formatDateDisplay(selectedDate);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Pencatatan Pengeluaran</h2>
 
       {/* Date Filter */}
@@ -150,7 +150,7 @@ export default function PengeluaranClient({
         onSubmit={handleAdd}
         className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-lg"
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Kategori</label>
             <select
@@ -195,7 +195,7 @@ export default function PengeluaranClient({
             />
           </div>
         )}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Nominal</label>
             <FormattedNumberInput
@@ -237,7 +237,7 @@ export default function PengeluaranClient({
       </form>
 
       {isPending ? (
-        <div className="grid grid-cols-2 gap-4 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
           <div className="rounded-2xl border border-notch-border bg-paper-light p-4 space-y-2">
             <div className="h-3 w-28 bg-ruled rounded" />
             <div className="h-7 w-32 bg-ruled rounded" />
@@ -248,7 +248,7 @@ export default function PengeluaranClient({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="rounded-2xl border border-notch-border bg-paper-light p-4">
             <p className="text-xs text-ink-light">Total Pengeluaran Cash {dateLabel}</p>
             <p className="text-xl font-bold text-ink">{formatRp(totalCash)}</p>

@@ -205,7 +205,7 @@ export default function EmployeeRiwayatClient({
                       className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-cream-card/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold" style={{ color: "#A0522D" }}>
+                        <span className="text-sm font-bold text-marker">
                           {g.supplier?.name || "Minuman Milik Sendiri"}
                         </span>
                         <span className="text-xs text-text-secondary">
@@ -235,10 +235,10 @@ export default function EmployeeRiwayatClient({
                               </span>
                             </div>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-light">
-                              <div className="flex flex-col items-center gap-1 flex-2">
+                              <div className="flex flex-col items-center gap-1 flex-[2]">
                                 <p>Awal</p> <strong className="text-ink tabular-nums">{ci.stok_awal}</strong>
                               </div>
-                              <div className="flex flex-col items-center gap-1 flex-2">
+                              <div className="flex flex-col items-center gap-1 flex-[2]">
                                 <p>Akhir</p> <strong className="text-ink tabular-nums">{ci.stok_akhir}</strong>
                               </div>
                               <div className="flex flex-col items-center gap-1 flex-1">
@@ -333,12 +333,12 @@ export default function EmployeeRiwayatClient({
               {selected.expenses && selected.expenses.length > 0 && (
                 <div className="rounded-lg bg-paper px-3 py-2 space-y-1 mt-2">
                   <p className="text-xs font-bold text-ink">Rincian Pengeluaran</p>
-                  <p className="text-[10px] text-ink-light">Data terkini — bisa berbeda saat verifikasi</p>
+                  <p className="text-xs text-ink-light">Data terkini — bisa berbeda saat verifikasi</p>
                   {selected.expenses.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-sm">
                       <span className="text-ink-light">
                         {e.category === "LAINNYA" ? e.custom_label || "Lainnya" : e.category.replace(/_/g, " ")}
-                        {e.note && <span className="text-[10px] text-ink-light/60"> · {e.note}</span>}
+                        {e.note && <span className="text-xs text-ink-light/60"> · {e.note}</span>}
                       </span>
                       <span className="tabular-nums text-marker">{formatRp(e.amount)}</span>
                     </div>
@@ -349,7 +349,7 @@ export default function EmployeeRiwayatClient({
               <div className="flex items-center justify-between text-sm pt-1 border-t border-ruled">
                 <span className="text-ink-light flex items-center gap-1">
                   Selisih
-                  <button onClick={() => setShowInfo(true)} className="inline-flex items-center justify-center rounded-full bg-ruled/40 w-4 h-4 text-[10px] text-ink-light hover:bg-ruled/60 transition-colors" aria-label="Info selisih">
+                  <button onClick={() => setShowInfo(true)} className="inline-flex items-center justify-center rounded-full bg-ruled/40 w-5 h-5 text-xs text-ink-light hover:bg-ruled/60 transition-colors" aria-label="Info selisih">
                     i
                   </button>
                 </span>
@@ -456,12 +456,12 @@ export default function EmployeeRiwayatClient({
                       {selected.expenses && selected.expenses.length > 0 && (
                         <div className="border-t border-ruled pt-3 space-y-2">
                           <p className="text-xs font-medium text-ink">Rincian Pengeluaran</p>
-                          <p className="text-[10px] text-ink-light">Data terkini — bisa berbeda saat verifikasi</p>
+                          <p className="text-xs text-ink-light">Data terkini — bisa berbeda saat verifikasi</p>
                           {selected.expenses.map((e) => (
                             <div key={e.id} className="flex items-center justify-between text-sm">
                               <span className="text-ink-light">
                                 {e.category === "LAINNYA" ? e.custom_label || "Lainnya" : e.category.replace(/_/g, " ")}
-                                {e.note && <span className="text-[10px] text-ink-light/60"> · {e.note}</span>}
+                                {e.note && <span className="text-xs text-ink-light/60"> · {e.note}</span>}
                               </span>
                               <span className="tabular-nums text-marker">{formatRp(e.amount)}</span>
                             </div>

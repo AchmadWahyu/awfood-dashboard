@@ -265,7 +265,7 @@ export default function EmployeeRequestEditClient({
               <div key={g.supplierId} className="rounded-xl border border-notch-border p-4">
                 <p className="mb-2 text-xs font-bold text-ink">{g.supplierName}</p>
                 <div className="overflow-x-auto">
-                  <table className="aw-table min-w-[480px]">
+                  <table className="aw-table min-w-full">
                     <thead>
                       <tr>
                         <th>PRODUK</th>
@@ -300,7 +300,7 @@ export default function EmployeeRequestEditClient({
               <div className="rounded-xl border border-notch-border p-4">
                 <p className="mb-2 text-xs font-bold text-ink">Minuman Milik Sendiri</p>
                 <div className="overflow-x-auto">
-                  <table className="aw-table min-w-[480px]">
+                  <table className="aw-table min-w-full">
                     <thead>
                       <tr>
                         <th>MINUMAN</th>
@@ -405,7 +405,7 @@ export default function EmployeeRequestEditClient({
             </div>
 
             <div className="overflow-x-auto mt-4">
-              <table className="aw-table min-w-[480px]">
+              <table className="aw-table min-w-full">
                 <thead>
                   <tr>
                     <th>ITEM</th>
@@ -434,7 +434,7 @@ export default function EmployeeRequestEditClient({
 
             <div className="mt-3">
               <div className="rounded-lg bg-paper px-3 py-2">
-                <p className="text-[10px] text-ink-light">Kas Fisik</p>
+                <p className="text-xs text-ink-light">Kas Fisik</p>
                 <p className="font-semibold text-ink tabular-nums">{formatRp(selectedReq.cash_physical)}</p>
               </div>
             </div>

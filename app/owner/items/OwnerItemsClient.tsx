@@ -176,7 +176,7 @@ export default function OwnerItemsClient({
   }, [editOpen, closeEdit]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Master Data Items</h2>
 
       {/* Search */}
@@ -204,7 +204,7 @@ export default function OwnerItemsClient({
 
       {/* Add Form — inline */}
       <form onSubmit={handleAdd} className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-lg">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Nama Item</label>
             <input value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
@@ -225,7 +225,7 @@ export default function OwnerItemsClient({
             {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Harga Modal</label>
             <FormattedNumberInput value={addForm.cost_price} onChange={(raw) => setAddForm({ ...addForm, cost_price: raw })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
@@ -250,7 +250,7 @@ export default function OwnerItemsClient({
           return (
             <div key={i.id} className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4">
               <div>
-                <p className="text-sm font-bold text-ink">{i.name} {i.is_active ? "" : <span className="text-[10px] text-ink-light">(nonaktif)</span>}</p>
+                <p className="text-sm font-bold text-ink">{i.name} {i.is_active ? "" : <span className="text-xs text-ink-light">(nonaktif)</span>}</p>
                 <p className="text-xs text-ink-light">
                   {i.category === "KONSINYASI_KUE" ? `${sup ? `${sup.name}` : ""}` : i.category === "MINUMAN_OWNER" ? "Minuman Owner" : "Ayam Penyet"} ·
                 </p>
@@ -258,9 +258,9 @@ export default function OwnerItemsClient({
                 <p className="text-xs text-ink-light">Jual {formatNumber(i.selling_price)}</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => openEdit(i)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
-                <button onClick={() => handleToggle(i.id, i.is_active)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">{i.is_active ? "Nonaktifkan" : "Aktifkan"}</button>
-                <button onClick={() => handleDelete(i.id)} className="rounded-lg border border-ruled px-2 py-1 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
+                <button onClick={() => openEdit(i)} className="rounded-lg border border-notch-border px-3 py-2 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
+                <button onClick={() => handleToggle(i.id, i.is_active)} className="rounded-lg border border-notch-border px-3 py-2 text-xs text-ink-light hover:bg-paper transition-colors">{i.is_active ? "Nonaktifkan" : "Aktifkan"}</button>
+                <button onClick={() => handleDelete(i.id)} className="rounded-lg border border-ruled px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
               </div>
             </div>
           );
@@ -291,7 +291,7 @@ export default function OwnerItemsClient({
             </div>
 
             <form onSubmit={handleUpdate} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-ink-light mb-1">Nama Item</label>
                   <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
@@ -312,7 +312,7 @@ export default function OwnerItemsClient({
                   {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-ink-light mb-1">Harga Modal</label>
                   <FormattedNumberInput value={editForm.cost_price} onChange={(raw) => setEditForm({ ...editForm, cost_price: raw })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />

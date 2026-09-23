@@ -48,14 +48,14 @@ export default function OwnerKaryawanPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Manage Karyawan</h2>
       <form onSubmit={editId ? handleUpdate : handleAdd} className=" rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm space-y-3 max-w-md">
         <div>
           <label className="block text-xs text-ink-light mb-1">Nama Lengkap</label>
           <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Kode Staff</label>
             <input value={form.staff_code} onChange={(e) => setForm({ ...form, staff_code: e.target.value })} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />
@@ -75,14 +75,14 @@ export default function OwnerKaryawanPage() {
         {users.map((u) => (
           <div key={u.id} className="flex items-center justify-between rounded-xl border border-notch-border bg-paper-light p-4">
             <div>
-              <p className="text-sm font-bold text-ink">{u.full_name} <span className="text-[10px] text-ink-light font-normal">({u.role})</span></p>
+              <p className="text-sm font-bold text-ink">{u.full_name} <span className="text-xs text-ink-light font-normal">({u.role})</span></p>
               <p className="text-xs text-ink-light">{u.email} {u.staff_code && `· ${u.staff_code}`}</p>
             </div>
             <div className="flex items-center gap-2">
               {u.role === "STAFF" && (
                 <>
-                  <button onClick={() => handleEdit(u)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
-                  <button onClick={() => handleRemove(u.id)} className="rounded-lg border border-notch-border px-2 py-1 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
+                  <button onClick={() => handleEdit(u)} className="rounded-lg border border-notch-border px-3 py-2 text-xs text-ink-light hover:bg-paper transition-colors">Edit</button>
+                  <button onClick={() => handleRemove(u.id)} className="rounded-lg border border-notch-border px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors">Hapus</button>
                 </>
               )}
             </div>

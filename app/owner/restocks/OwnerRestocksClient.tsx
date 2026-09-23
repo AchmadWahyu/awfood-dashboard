@@ -36,7 +36,7 @@ export default function OwnerRestocksClient({
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Restock Minuman</h2>
       
       {/* Form */}
@@ -48,7 +48,7 @@ export default function OwnerRestocksClient({
             {beverages.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-ink-light mb-1">Qty</label>
             <input type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} required className="w-full rounded-xl border-2 border-ruled bg-transparent px-3 py-2 text-sm outline-none focus:border-marker" />

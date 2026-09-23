@@ -277,7 +277,7 @@ export default function OwnerLaporanClient() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <h2 className="text-xl font-bold text-ink">Laporan & Export</h2>
 
       {/* Date Filter */}
@@ -380,17 +380,17 @@ export default function OwnerLaporanClient() {
                     <span className="text-xs text-ink-light">Tap untuk detail</span>
                   </div>
                   <p className="text-2xl font-bold text-marker tabular-nums mb-4">{formatRp(c.total_omzet)}</p>
-                  <div className="grid grid-cols-3 gap-3 border-t border-ruled pt-3">
+                    <div className="grid grid-cols-3 gap-3 border-t border-ruled pt-3">
                     <div>
-                      <p className="text-[10px] uppercase tracking-wide text-ink-light">Kas</p>
+                      <p className="text-xs uppercase tracking-wide text-ink-light">Kas</p>
                       <p className="text-sm font-semibold text-ink tabular-nums">{formatRp(c.cash_physical)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-wide text-ink-light">QRIS</p>
+                      <p className="text-xs uppercase tracking-wide text-ink-light">QRIS</p>
                       <p className="text-sm font-semibold text-ink tabular-nums">{formatRp(c.qris_verified || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-wide text-ink-light">Selisih</p>
+                      <p className="text-xs uppercase tracking-wide text-ink-light">Selisih</p>
                       <p className={`text-sm font-semibold tabular-nums ${s.cls}`}>{s.text}</p>
                     </div>
                   </div>
@@ -408,38 +408,30 @@ export default function OwnerLaporanClient() {
           {discrepancies.length === 0 ? (
             <p className="text-xs text-ink-light">Tidak ada selisih untuk rentang tanggal ini.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="aw-table min-w-[640px]">
-                <thead>
-                  <tr>
-                    <th>TANGGAL</th>
-                    <th>STAFF</th>
-                    <th className="text-right">SELISIH</th>
-                    <th className="text-center">STATUS</th>
-                    <th className="text-center">RESOLUSI</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {discrepancies.map((c) => {
-                    const s = selisihView(c.discrepancy);
-                    return (
-                      <tr key={c.id}>
-                        <td className="font-medium">{formatDateDisplay(c.date)}</td>
-                        <td>{c.staff_name}</td>
-                        <td className={`text-right tabular-nums ${s.cls}`}>{s.text}</td>
-                        <td className="text-center">
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.discrepancy_status === "open" ? "bg-marker-light text-marker" : "bg-notch-success text-notch-success-text"}`}>
-                            {c.discrepancy_status === "open" ? "Terbuka" : "Resolved"}
-                          </span>
-                        </td>
-                        <td className="text-center text-xs text-ink-light">
-                          {c.discrepancy_resolution || "-"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {discrepancies.map((c) => {
+                const s = selisihView(c.discrepancy);
+                return (
+                  <div
+                    key={c.id}
+                    className="rounded-2xl border border-notch-border bg-paper-light p-5 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-ink">{formatDateDisplay(c.date)}</span>
+                      <span className={`rounded-full px-3 py-0.5 text-xs font-medium ${c.discrepancy_status === "open" ? "bg-marker-light text-marker" : "bg-notch-success text-notch-success-text"}`}>
+                        {c.discrepancy_status === "open" ? "Terbuka" : "Resolved"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-ink-light">{c.staff_name}</span>
+                      <span className={`font-bold tabular-nums ${s.cls}`}>{s.text}</span>
+                    </div>
+                    {c.discrepancy_resolution && (
+                      <p className="mt-2 text-xs text-ink-light">{c.discrepancy_resolution}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -480,7 +472,7 @@ export default function OwnerLaporanClient() {
                       className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-cream-card/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold" style={{ color: "#A0522D" }}>
+                        <span className="text-sm font-bold text-marker">
                           {g.supplier?.name || "Minuman Milik Sendiri"}
                         </span>
                         <span className="text-xs text-text-secondary">
@@ -497,7 +489,7 @@ export default function OwnerLaporanClient() {
                     {isOpen && (
                       <div className="border-t border-cream-border">
                         <div className="overflow-x-auto">
-                          <table className="aw-table min-w-[480px]">
+                          <table className="aw-table min-w-full">
                             <thead>
                               <tr>
                                 <th>ITEM</th>
@@ -554,7 +546,7 @@ export default function OwnerLaporanClient() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-ink-light flex items-center gap-1">
                   Selisih
-                  <button onClick={() => setShowInfo(true)} className="inline-flex items-center justify-center rounded-full bg-ruled/40 w-4 h-4 text-[10px] text-ink-light hover:bg-ruled/60 transition-colors" aria-label="Info selisih">
+                  <button onClick={() => setShowInfo(true)} className="inline-flex items-center justify-center rounded-full bg-ruled/40 w-5 h-5 text-xs text-ink-light hover:bg-ruled/60 transition-colors" aria-label="Info selisih">
                     i
                   </button>
                 </span>
